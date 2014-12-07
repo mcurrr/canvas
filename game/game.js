@@ -16,7 +16,13 @@ var keyboard = new Keyboard (game);
 var mouse = new Mouse (game);
 
 mouse.on("click", function (e) {
-
+	if (player.exists) {
+		bullets[bullets.length] = new Bullet(game, {
+			x: player.x + player.width / 2,
+			y: player.y + player.height / 2,
+			target: {x: e.x, y: e.y}
+		});
+	}
 });
 
 game.on("update", function (dt) {
@@ -29,5 +35,6 @@ game.on("draw", function (context) {
 });
 
 var player = new Player (game, {keys: keyboard.keysDown});
+var bullets = [];
 
 game.start();

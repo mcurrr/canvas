@@ -17,7 +17,7 @@ function Player (game, options) {
 	this.y = game.height / 2;
 	this.color = "#fff";
 	this.speed = 5;
-	this.friction = 0.9;
+	this.friction = 0.95;
 
 	this.velocity = {
 		x: 0,
