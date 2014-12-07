@@ -1,4 +1,4 @@
-var Entity = require ("crtdrg-entity");
+var Entity = require ("crtrdg-entity");
 var aabb = require ("aabb-2d");
 var inherits = require ("inherits");
 

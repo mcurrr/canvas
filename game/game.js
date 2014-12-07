@@ -2,9 +2,9 @@ var Game = require ("gameloop-canvas");
 var Keyboard = require ("crtrdg-keyboard");
 var Mouse = require ("crtrdg-mouse");
 
-var Player = require("./player.js");
-var Bullet = require("./bullet.js");
-var Enemy = require("./enemy.js");
+var Player = require("./player");
+var Bullet = require("./bullet");
+var Enemy = require("./enemy");
 
 var game = Game ({
 	canvas: "game",
@@ -26,6 +26,6 @@ game.on("draw", function(context) {
 	context.fillRect(0, 0, game.width, game.height);
 });
 
-var player = new Player (game, {keys: keyboard.keysDown});
+// var player = new Player (game, {keys: keyboard.keysDown});
 
 game.start();
