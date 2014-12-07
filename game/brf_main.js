@@ -3,38 +3,40 @@
 },{}],2:[function(require,module,exports){
 module.exports=require(1)
 },{"/home/technosigal/repo/canvas/game/bullet.js":1}],3:[function(require,module,exports){
-var Game = require ("gameloop-canvas");
-var Keyboard = require ("crtrdg-keyboard");
-var Mouse = require ("crtrdg-mouse");
+var Game = require("gameloop-canvas");
+var Keyboard = require("crtrdg-keyboard");
+var Mouse = require("crtrdg-mouse");
 
 var Player = require("./player");
 var Bullet = require("./bullet");
 var Enemy = require("./enemy");
 
-var game = Game ({
+var game = Game({
 	canvas: "game",
 	width: window.innerWidth,
 	height: window.innerHeight
 });
 
-var keyboard = new Keyboard(game);
-var mouse = new Mouse(game);
+var keyboard = new Keyboard (game);
+var mouse = new Mouse (game);
 
-mouse.on("click", function(e) {});
-
-game.on("update", function(dt) {
+mouse.on("click", function (e) {
 
 });
 
-game.on("draw", function(context) {
+game.on("update", function (dt) {
+
+});
+
+game.on("draw", function (context) {
 	context.fillStyle = "#ef4e12";
-	context.fillRect(0, 0, game.width, game.height);
+	context.fillRect (0, 0, game.width, game.height);
 });
 
-// var player = new Player (game, {keys: keyboard.keysDown});
+var player = new Player (game, {keys: keyboard.keysDown});
 
 game.start();
-},{"./bullet":1,"./enemy":2,"./player":17,"crtrdg-keyboard":8,"crtrdg-mouse":11,"gameloop-canvas":13}],4:[function(require,module,exports){
+},{"./bullet":1,"./enemy":2,"./player":16,"crtrdg-keyboard":8,"crtrdg-mouse":11,"gameloop-canvas":13}],4:[function(require,module,exports){
 module.exports = AABB
 
 var vec2 = require('gl-matrix').vec2
@@ -4089,7 +4091,7 @@ Entity.prototype.findEntity = function(entity, callback){
   callback(exists, entities, index);
 };
 
-},{"events":18,"inherits":7}],7:[function(require,module,exports){
+},{"events":17,"inherits":7}],7:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -4145,7 +4147,7 @@ Keyboard.prototype.initializeListeners = function(){
     delete self.keysDown[vkey[e.keyCode]];
   }, false);
 };
-},{"events":18,"inherits":9,"vkey":10}],9:[function(require,module,exports){
+},{"events":17,"inherits":9,"vkey":10}],9:[function(require,module,exports){
 module.exports=require(7)
 },{"/home/technosigal/repo/canvas/game/node_modules/crtrdg-entity/node_modules/inherits/inherits_browser.js":7}],10:[function(require,module,exports){
 var ua = typeof window !== 'undefined' ? window.navigator.userAgent : ''
@@ -4355,7 +4357,7 @@ Mouse.prototype.calculateOffset = function(e, callback){
   callback(location);
 }
 
-},{"events":18,"inherits":12}],12:[function(require,module,exports){
+},{"events":17,"inherits":12}],12:[function(require,module,exports){
 module.exports=require(7)
 },{"/home/technosigal/repo/canvas/game/node_modules/crtrdg-entity/node_modules/inherits/inherits_browser.js":7}],13:[function(require,module,exports){
 var GameLoop = require('gameloop');
@@ -4534,30 +4536,28 @@ Game.prototype.timestamp = function() {
   return global.performance && global.performance.now ? global.performance.now() : new Date().getTime();
 }
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"events":18,"inherits":15}],15:[function(require,module,exports){
+},{"events":17,"inherits":15}],15:[function(require,module,exports){
 module.exports=require(7)
 },{"/home/technosigal/repo/canvas/game/node_modules/crtrdg-entity/node_modules/inherits/inherits_browser.js":7}],16:[function(require,module,exports){
-module.exports=require(7)
-},{"/home/technosigal/repo/canvas/game/node_modules/crtrdg-entity/node_modules/inherits/inherits_browser.js":7}],17:[function(require,module,exports){
-var Entity = require ("crtrdg-entity");
-var aabb = require ("aabb-2d");
-var inherits = require ("inherits");
+var Entity = require("crtrdg-entity");
+var aabb = require("aabb-2d");
+var inherits = require("inherits");
 
 module.exports = Player;
-inherits (Player, Entity);
+inherits(Player, Entity);
 
 function Player (game, options) {
 	var self = this;
 
 	this.game = game;
-	this.addTo (game);
+	this.addTo(game);
 	this.keys = options.keys;
 	this.width = 20;
 	this.height = 20;
 	this.x = game.width / 2;
 	this.y = game.height / 2;
-	this.color = "#ffffff";
-	this.speed = 10;
+	this.color = "#fff";
+	this.speed = 5;
 	this.friction = 0.9;
 
 	this.velocity = {
@@ -4565,19 +4565,26 @@ function Player (game, options) {
 		y: 0
 	};
 
-	this.boundingBox = aabb ([this.x, this.y] [this.width, this.height]);
+	this.boundingBox = aabb([this.x, this.y], [this.width, this.height]);
 
 	this.game.on("update", function (dt) {
-		if (self.exist) {
+		if (self.exists) {
 			self.input();
 			self.move();
 			self.boundaries();
 			self.boundingBox = aabb([self.x, self.y], [self.width, self.height]);
 		}
 	});
+
+	this.game.on("draw", function (context) {
+		if (self.exists) {
+			context.strokeStyle = "#fff";
+			context.strokeRect (self.x, self.y, self.width, self.height);
+		}
+	});
 };
 
-Player.prototype.boundaries = function () {
+Player.prototype.move = function () {
 	this.x += this.velocity.x;
 	this.y += this.velocity.y;
 	this.velocity.x *= this.friction;
@@ -4586,19 +4593,19 @@ Player.prototype.boundaries = function () {
 
 Player.prototype.boundaries = function () {
 	if (this.x <= 0) {
-		this.x = 0
+		this.x = 0;
 	}
 
 	if (this.y <= 0) {
-		this.y = 0
+		this.y = 0;
 	}
 
 	if (this.x >= this.game.width - this.width) {
-		this.x = this.game.width - this.width
+		this.x = this.game.width - this.width;
 	}
 
 	if (this.y >= this.game.height - this.height) {
-		this.x = this.game.height - this.height
+		this.y = this.game.height - this.height;
 	}
 };
 
@@ -4619,7 +4626,7 @@ Player.prototype.input = function () {
 		this.velocity.y = this.speed;
 	}
 };
-},{"aabb-2d":4,"crtrdg-entity":6,"inherits":16}],18:[function(require,module,exports){
+},{"aabb-2d":4,"crtrdg-entity":6,"inherits":15}],17:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
