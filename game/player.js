@@ -13,7 +13,7 @@ function Player (game, options) {
 	this.keys = options.keys;
 	this.width = 20;
 	this.height = 20;
-	this.x = game.width / 2;
+	this.x = game.width / 4;
 	this.y = game.height / 2;
 	this.color = "#fff";
 	this.speed = 5;

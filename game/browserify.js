@@ -16,7 +16,7 @@ function Bullet (game, options) {
 	this.width = options.width || 6;
 	this.height = options.height || 6;
 	this.color = options.color || "#fff";
-	this.speed = options.speed || 15;
+	this.speed = options.speed || 20;
 
 	this.target = {
 		x: options.target.x,
@@ -35,17 +35,17 @@ function Bullet (game, options) {
 	this.boundingBox = aabb([this.x, this.y], [this.width, this.height]);
 
 	/*
-	Update the bulletposition
+	Update the bullet position
 	*/
 
 	this.game.on("update", function (dt) {
 		if (self.exists) {
-			self.boundingBox = aabb([self.x, self.y], [self.width, self.height]);
 			self.velocity.x = (self.dx / self.mag) * self.speed;
 			self.velocity.y = (self.dy / self.mag) * self.speed;
 			self.x += self.velocity.x;
 			self.y += self.velocity.y;
 			self.boundaries();
+			self.boundingBox = aabb([self.x, self.y], [self.width, self.height]);
 		}
 	});
 
@@ -84,8 +84,85 @@ Bullet.prototype.boundaries = function () {
 	}
 };
 },{"aabb-2d":4,"crtrdg-entity":6,"inherits":15}],2:[function(require,module,exports){
+var Entity = require("crtrdg-entity");
+var aabb = require("aabb-2d");
+var inherits = require("inherits");
 
-},{}],3:[function(require,module,exports){
+module.exports = Enemy;
+inherits(Enemy, Entity);
+
+function Enemy (game, options) {
+	var self = this;
+
+	this.game = game;
+	this.addTo(game);
+	this.width = 25;
+	this.height = 25;
+	this.x = game.width - this.width;
+	this.y = randomInt(this.height + 150, game.height - 150);
+	this.color = "#eee";
+	this.speed = 2;
+	this.friction = 0.9;
+
+	this.direction = {
+		x: randomInt(-5, -15),
+		y: randomInt(-10, 10)
+	};
+
+	this.velocity = {
+		x: 0,
+		y: 0
+	};
+
+	this.boundingBox = aabb([this.x, this.y], [this.width, this.height]);
+
+	this.game.on("update", function (dt) {
+		if (self.exists) {
+			self.move();
+			// self.grow();
+			self.boundaries();
+			self.boundingBox = aabb([self.x, self.y], [this.width, this.height]);
+		}
+	});
+
+	this.game.on("draw", function (context) {
+		if (self.exists) {
+			for (var w = 0; w < 3; w++) {
+				context.save();
+				context.translate(self.x, self.y);
+				context.rotate(Math.PI/180 * randomInt(-180, 180));
+				context.storkeStyle = self.color;
+				context.strokeRect(-self.width/2, -self.height/2, self.width, self.height);
+				context.restore();
+			};
+		}
+	});
+};
+
+Enemy.prototype.move = function () {
+	this.x += 0.1 * this.speed * this.direction.x;
+	this.y += 0.1 * this.speed * this.direction.y;
+};
+
+Enemy.prototype.grow = function () {
+	this.width += 1;
+	this.height += 1;
+};
+
+Enemy.prototype.boundaries = function () {
+	if (this.x <= 0 || this.x >= this.game.width - this.width) {
+		this.direction.x *= -1;
+	}
+
+	if (this.y <= 0 || this.y >= this.game.height - this.height) {
+		this.direction.y *= -1;
+	}
+};
+
+function randomInt (min, max) {
+	return Math.floor(Math.random() * (max - min + 1) + min);
+};
+},{"aabb-2d":4,"crtrdg-entity":6,"inherits":15}],3:[function(require,module,exports){
 var Game = require("gameloop-canvas");
 var Keyboard = require("crtrdg-keyboard");
 var Mouse = require("crtrdg-mouse");
@@ -103,6 +180,8 @@ var game = Game({
 var keyboard = new Keyboard (game);
 var mouse = new Mouse (game);
 
+var bullets = [];
+
 mouse.on("click", function (e) {
 	if (player.exists) {
 		bullets[bullets.length] = new Bullet(game, {
@@ -114,7 +193,24 @@ mouse.on("click", function (e) {
 });
 
 game.on("update", function (dt) {
+	enemies.forEach(function (enemy) {
+		if (player.boundingBox.intersects(enemy.boundingBox)) {
+			if (enemy.exists) {
+				enemy.direction.x *= -1;
+				enemy.direction.y *= -1;
+			}
+		}
 
+		bullets.forEach(function (bullet) {
+			if (bullet.boundingBox.intersects(enemy.boundingBox)) {
+				if (enemy.exists) {
+					bullet.remove();
+					enemy.remove();
+					enemies[enemies.length] = new Enemy(game);
+				}
+			}
+		});
+	});
 });
 
 game.on("draw", function (context) {
@@ -123,7 +219,12 @@ game.on("draw", function (context) {
 });
 
 var player = new Player (game, {keys: keyboard.keysDown});
-var bullets = [];
+
+var enemies = [];
+
+for (var i = 0; i < 5; i++) {
+	enemies[enemies.length] = new Enemy(game);
+}
 
 game.start();
 },{"./bullet":1,"./enemy":2,"./player":16,"crtrdg-keyboard":8,"crtrdg-mouse":11,"gameloop-canvas":13}],4:[function(require,module,exports){
@@ -4644,7 +4745,7 @@ function Player (game, options) {
 	this.keys = options.keys;
 	this.width = 20;
 	this.height = 20;
-	this.x = game.width / 2;
+	this.x = game.width / 4;
 	this.y = game.height / 2;
 	this.color = "#fff";
 	this.speed = 5;

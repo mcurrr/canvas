@@ -15,7 +15,7 @@ function Bullet (game, options) {
 	this.width = options.width || 6;
 	this.height = options.height || 6;
 	this.color = options.color || "#fff";
-	this.speed = options.speed || 15;
+	this.speed = options.speed || 20;
 
 	this.target = {
 		x: options.target.x,
@@ -34,17 +34,17 @@ function Bullet (game, options) {
 	this.boundingBox = aabb([this.x, this.y], [this.width, this.height]);
 
 	/*
-	Update the bulletposition
+	Update the bullet position
 	*/
 
 	this.game.on("update", function (dt) {
 		if (self.exists) {
-			self.boundingBox = aabb([self.x, self.y], [self.width, self.height]);
 			self.velocity.x = (self.dx / self.mag) * self.speed;
 			self.velocity.y = (self.dy / self.mag) * self.speed;
 			self.x += self.velocity.x;
 			self.y += self.velocity.y;
 			self.boundaries();
+			self.boundingBox = aabb([self.x, self.y], [self.width, self.height]);
 		}
 	});
 
