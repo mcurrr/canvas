@@ -1,0 +1,5 @@
+node_modules/
+gulpfile.js
+game/node_modules/
+game/.gitignore
+game/gulpfile.js
