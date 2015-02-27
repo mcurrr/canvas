@@ -7,8 +7,8 @@ function Enemy (options) {
 	this.u = u++;
 	this.width = 25;
 	this.height = 25;
-	this.x = randomInt(canvas.width - this.width*2, canvas.width);
-	this.y = randomInt(0, canvas.height);
+	this.x = randomInt(canvas.width - this.width * 3, canvas.width - this.width * 1.5);
+	this.y = randomInt(0, canvas.height - this.height);
 	this.X = this.x + this.width;
 	this.Y = this.y + this.height;
 	this.color = randomColor(0, 255, 0, 255, 0, 255, 0.8);
@@ -51,10 +51,10 @@ Enemy.prototype.grow = function () {
 };
 
 Enemy.prototype.boundaries = function () {
-	if (this.x <= this.width/2 || this.x >= canvas.width - this.width/2) {
+	if (this.x <= 0 || this.x >= canvas.width-this.width) {
 		this.direction.x *= -1;
 	}
-	if (this.y <= this.height/2 || this.y >= canvas.height - this.height/2) {
+	if (this.y <= 0 || this.y >= canvas.height-this.height) {
 		this.direction.y *= -1;
 	}
 };

@@ -15,7 +15,7 @@ window.bullets = [];
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
-	e.preventDefault();
+	// e.preventDefault();
 });
 
 window.addEventListener("keyup", function(e) {

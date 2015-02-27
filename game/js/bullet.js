@@ -89,4 +89,4 @@ function find(array, value) {
 		if (array[i].u == value.u) return i;
 		}
 	return -1;
-}
+} 

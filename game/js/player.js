@@ -10,12 +10,12 @@ function Player (options) {
 	this.X = this.x + this.width;
 	this.Y = this.y + this.height;
 	this.color = "#fff";
-	this.speed = 5;
+	this.speed = 3;
 	this.friction = 0.95;
 	this.ang = 0;
-	this.angel = function () {
+	this.angle = function () {
 		if (this.ang < 360) {
-			return this.ang++;
+			return this.ang += 6;
 		}
 		else {
 			return this.ang = 0;
@@ -31,7 +31,7 @@ function Player (options) {
 		self.input();
 		self.move();
 		self.boundaries();
-		self.angel();
+		self.angle();
 	};
 
 	this.draw = function (context) {
@@ -72,32 +72,25 @@ Player.prototype.boundaries = function () {
 };
 
 Player.prototype.input = function () {
-	if (37 in keys) {
-		player.x -= player.speed;
-		player.direction = "left";
+	if (65 in keys) {
+		this.x -= this.speed;
+		this.velocity.x = -2;
+		this.direction = "left";
 	}
-	if (39 in keys) {
-		player.x += player.speed;
-		player.direction = "right";
+	if (68 in keys) {
+		this.x += this.speed;
+		this.velocity.x = 2;
+		this.direction = "right";
 	}
-	if (38 in keys) {
-		player.y -= player.speed;
-		player.direction = "up";
+	if (87 in keys) {
+		this.y -= this.speed;
+		this.velocity.y = -2;
+		this.direction = "up";
 	}
-	if (40 in keys) {
-		player.y += player.speed;
-		player.direction = "down";
-	}
-	if (37 in keys && 40 in keys) {
-		player.direction = "left-down";
-	}
-	if (39 in keys && 40 in keys) {
-		player.direction = "right-down";
-	}
-	if (37 in keys && 38 in keys) {
-		player.direction = "left-up";
-	}
-	if (39 in keys && 38 in keys) {
-		player.direction = "right-up";
+	if (83 in keys) {
+		this.y += this.speed;
+		this.velocity.y = 2;
+		this.direction = "down";
 	}
 };
+ 

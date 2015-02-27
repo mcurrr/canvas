@@ -16,7 +16,7 @@ window.bullets = [];
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
-	e.preventDefault();
+	// e.preventDefault();
 });
 
 window.addEventListener("keyup", function(e) {
@@ -229,7 +229,7 @@ function find(array, value) {
 		if (array[i].u == value.u) return i;
 		}
 	return -1;
-}
+} 
 },{}],3:[function(require,module,exports){
 module.exports = Enemy;
 var u = 0;
@@ -240,8 +240,8 @@ function Enemy (options) {
 	this.u = u++;
 	this.width = 25;
 	this.height = 25;
-	this.x = randomInt(canvas.width - this.width*2, canvas.width);
-	this.y = randomInt(0, canvas.height);
+	this.x = randomInt(canvas.width - this.width * 3, canvas.width - this.width * 1.5);
+	this.y = randomInt(0, canvas.height - this.height);
 	this.X = this.x + this.width;
 	this.Y = this.y + this.height;
 	this.color = randomColor(0, 255, 0, 255, 0, 255, 0.8);
@@ -284,10 +284,10 @@ Enemy.prototype.grow = function () {
 };
 
 Enemy.prototype.boundaries = function () {
-	if (this.x <= this.width/2 || this.x >= canvas.width - this.width/2) {
+	if (this.x <= 0 || this.x >= canvas.width-this.width) {
 		this.direction.x *= -1;
 	}
-	if (this.y <= this.height/2 || this.y >= canvas.height - this.height/2) {
+	if (this.y <= 0 || this.y >= canvas.height-this.height) {
 		this.direction.y *= -1;
 	}
 };
@@ -331,12 +331,12 @@ function Player (options) {
 	this.X = this.x + this.width;
 	this.Y = this.y + this.height;
 	this.color = "#fff";
-	this.speed = 5;
+	this.speed = 3;
 	this.friction = 0.95;
 	this.ang = 0;
-	this.angel = function () {
+	this.angle = function () {
 		if (this.ang < 360) {
-			return this.ang++;
+			return this.ang += 6;
 		}
 		else {
 			return this.ang = 0;
@@ -352,7 +352,7 @@ function Player (options) {
 		self.input();
 		self.move();
 		self.boundaries();
-		self.angel();
+		self.angle();
 	};
 
 	this.draw = function (context) {
@@ -393,33 +393,26 @@ Player.prototype.boundaries = function () {
 };
 
 Player.prototype.input = function () {
-	if (37 in keys) {
-		player.x -= player.speed;
-		player.direction = "left";
+	if (65 in keys) {
+		this.x -= this.speed;
+		this.velocity.x = -2;
+		this.direction = "left";
 	}
-	if (39 in keys) {
-		player.x += player.speed;
-		player.direction = "right";
+	if (68 in keys) {
+		this.x += this.speed;
+		this.velocity.x = 2;
+		this.direction = "right";
 	}
-	if (38 in keys) {
-		player.y -= player.speed;
-		player.direction = "up";
+	if (87 in keys) {
+		this.y -= this.speed;
+		this.velocity.y = -2;
+		this.direction = "up";
 	}
-	if (40 in keys) {
-		player.y += player.speed;
-		player.direction = "down";
-	}
-	if (37 in keys && 40 in keys) {
-		player.direction = "left-down";
-	}
-	if (39 in keys && 40 in keys) {
-		player.direction = "right-down";
-	}
-	if (37 in keys && 38 in keys) {
-		player.direction = "left-up";
-	}
-	if (39 in keys && 38 in keys) {
-		player.direction = "right-up";
+	if (83 in keys) {
+		this.y += this.speed;
+		this.velocity.y = 2;
+		this.direction = "down";
 	}
 };
+ 
 },{}]},{},[1]);
