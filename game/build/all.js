@@ -10,7 +10,7 @@ var context = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-var killed = 0;
+window.killed = 0;
 
 window.keys = {};
 window.bullets = [];
@@ -24,6 +24,9 @@ window.addEventListener("keyup", function(e) {
 	delete keys[e.keyCode];
 });
 
+	window.statistic = 'Accuracy: 0%';
+	console.log(statistic);
+
 window.addEventListener("click", function (e) {
 	if (player !== undefined) {
 		bullets[bullets.length] = new Bullet({
@@ -31,9 +34,6 @@ window.addEventListener("click", function (e) {
 			y: player.y + player.height / 2,
 			target: {x: e.clientX, y: e.clientY}
 		});
-		var statistic = 'Accuracy: ' + Math.floor(killed / bullets[bullets.length - 1].u * 100) + '%';
-		console.clear();
-		console.log(statistic);
 	}
 });
 
@@ -51,30 +51,35 @@ function isColliding (a, b) {
 
 function enemiesCollide(value) {
 	for(var i=0; i<enemies.length; i++) {
-		if (enemies[i].u == value.u) {
+		if (enemies[i] === undefined) {
 			continue;
 		}
 		else {
-			if(isColliding(enemies[i], value)) {
-				if (((enemies[i].direction.x > 0 && enemies[i].direction.y < 0) &&
-					 (value.direction.x > 0 && value.direction.y > 0)) ||
-					 ((enemies[i].direction.x < 0 && enemies[i].direction.y < 0) &&
-					 (value.direction.x < 0 && value.direction.y > 0))) {
-						value.direction.y *= -1;
-						enemies[i].direction.y *= -1;
-				}
-				else if (((enemies[i].direction.y > 0 && enemies[i].direction.x < 0) &&
-					 (value.direction.y > 0 && value.direction.x > 0)) ||
-					 ((enemies[i].direction.y < 0 && enemies[i].direction.x < 0) &&
-					 (value.direction.y < 0 && value.direction.x > 0))) {
+			if (enemies[i].u == value.u) {
+				continue;
+			}
+			else {
+				if(isColliding(enemies[i], value)) {
+					if (((enemies[i].direction.x > 0 && enemies[i].direction.y < 0) &&
+						 (value.direction.x > 0 && value.direction.y > 0)) ||
+						 ((enemies[i].direction.x < 0 && enemies[i].direction.y < 0) &&
+						 (value.direction.x < 0 && value.direction.y > 0))) {
+							value.direction.y *= -1;
+							enemies[i].direction.y *= -1;
+					}
+					else if (((enemies[i].direction.y > 0 && enemies[i].direction.x < 0) &&
+						 (value.direction.y > 0 && value.direction.x > 0)) ||
+						 ((enemies[i].direction.y < 0 && enemies[i].direction.x < 0) &&
+						 (value.direction.y < 0 && value.direction.x > 0))) {
+							value.direction.x *= -1;
+							enemies[i].direction.x *= -1;
+					}
+					else {
 						value.direction.x *= -1;
+						value.direction.y *= -1;
 						enemies[i].direction.x *= -1;
-				}
-				else {
-					value.direction.x *= -1;
-					value.direction.y *= -1;
-					enemies[i].direction.x *= -1;
-					enemies[i].direction.y *= -1;
+						enemies[i].direction.y *= -1;
+					}
 				}
 			}
 		}
@@ -93,7 +98,9 @@ function draw () {
 		});
 	}
 	enemies.forEach(function (enemy) {
-		enemy.draw(context);
+		if (enemy !== undefined) {
+			enemy.draw(context);
+		}
 	});
 	timer.draw(context);
 };
@@ -105,26 +112,30 @@ function update() {
 	}
 
 	enemies.forEach(function (enemy) {
-		if (player !== undefined) {
+		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
-				enemy.reload();
+				enemy.remove();
 				player = undefined;
 				bullets = undefined;
 				console.clear();
 				console.log('game over');
 			}
+			else {
+			}
 			if (bullets !== undefined) {
 				bullets.forEach(function (bullet) {
 					if (isColliding (bullet, enemy)) {
-						bullet.remove();
-						enemy.reload();
 						++killed;
+						bullet.remove();
+						enemy.remove();
 					}
 				});
 			}
 		}
-		enemiesCollide (enemy);
-		enemy.update();
+		if (enemy !== undefined) {
+			enemiesCollide (enemy);
+			enemy.update();
+		}
 	});
 	if (bullets !== undefined) {
 		bullets.forEach(function (bullet) {
@@ -219,6 +230,9 @@ Bullet.prototype.boundaries = function () {
 };
 
 Bullet.prototype.remove = function () {
+	console.clear();
+	statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
+	console.log(statistic);
 	var del = find(bullets, this);
 	if (del != -1) {
 		bullets.splice(bullets[del], 1);
@@ -227,12 +241,6 @@ Bullet.prototype.remove = function () {
 	}
 };
 
-function find(array, value) {
-	for(var i=0; i<array.length; i++) {
-		if (array[i].u == value.u) return i;
-		}
-	return -1;
-} 
 },{}],3:[function(require,module,exports){
 module.exports = Enemy;
 var u = 0;
@@ -243,7 +251,7 @@ function Enemy (options) {
 	this.u = u++;
 	this.width = 25;
 	this.height = 25;
-	this.x = randomInt(canvas.width - this.width * 3, canvas.width - this.width * 1.5);
+	this.x = randomInt(canvas.width - this.width * 4, canvas.width - this.width * 2);
 	this.y = randomInt(0, canvas.height - this.height);
 	this.X = this.x + this.width;
 	this.Y = this.y + this.height;
@@ -299,18 +307,21 @@ function randomInt (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-Enemy.prototype.reload = function () {
+Enemy.prototype.remove = function () {
 	var del = find(enemies, this);
 	if (del != -1) {
-		enemies.splice(enemies[del], 1, enemies[del] = new Enemy());
+		enemies[del] = undefined;
 	}
 	else {
+		console.log('error!');
 	}
 };
 
 function find(array, value) {
 	for(var i=0; i<array.length; i++) {
-		if (array[i].u == value.u) return i;
+		if (value !== undefined && array[i] !== undefined) {
+			if (array[i].u == value.u) return i;
+			}
 		}
 	return -1;
 }

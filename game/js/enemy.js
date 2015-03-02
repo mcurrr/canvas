@@ -7,7 +7,7 @@ function Enemy (options) {
 	this.u = u++;
 	this.width = 25;
 	this.height = 25;
-	this.x = randomInt(canvas.width - this.width * 3, canvas.width - this.width * 1.5);
+	this.x = randomInt(canvas.width - this.width * 4, canvas.width - this.width * 2);
 	this.y = randomInt(0, canvas.height - this.height);
 	this.X = this.x + this.width;
 	this.Y = this.y + this.height;
@@ -63,18 +63,21 @@ function randomInt (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-Enemy.prototype.reload = function () {
+Enemy.prototype.remove = function () {
 	var del = find(enemies, this);
 	if (del != -1) {
-		enemies.splice(enemies[del], 1, enemies[del] = new Enemy());
+		enemies[del] = undefined;
 	}
 	else {
+		console.log('error!');
 	}
 };
 
 function find(array, value) {
 	for(var i=0; i<array.length; i++) {
-		if (array[i].u == value.u) return i;
+		if (value !== undefined && array[i] !== undefined) {
+			if (array[i].u == value.u) return i;
+			}
 		}
 	return -1;
 }

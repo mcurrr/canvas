@@ -76,6 +76,9 @@ Bullet.prototype.boundaries = function () {
 };
 
 Bullet.prototype.remove = function () {
+	console.clear();
+	statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
+	console.log(statistic);
 	var del = find(bullets, this);
 	if (del != -1) {
 		bullets.splice(bullets[del], 1);
@@ -83,10 +86,3 @@ Bullet.prototype.remove = function () {
 	else {
 	}
 };
-
-function find(array, value) {
-	for(var i=0; i<array.length; i++) {
-		if (array[i].u == value.u) return i;
-		}
-	return -1;
-} 
