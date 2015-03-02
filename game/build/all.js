@@ -2,6 +2,7 @@
 var Player = require("./player");
 var Bullet = require("./bullet");
 var Enemy = require("./enemy");
+var Timer = require("./timer.js");
 
 window.canvas = document.getElementById("game");
 var context = canvas.getContext("2d");
@@ -37,7 +38,7 @@ window.addEventListener("click", function (e) {
 });
 
 window.player = new Player ();
-
+window.timer = new Timer();
 window.enemies = [];
 
 for (var i = 0; i < 50; i++) {
@@ -94,11 +95,13 @@ function draw () {
 	enemies.forEach(function (enemy) {
 		enemy.draw(context);
 	});
+	timer.draw(context);
 };
 
 function update() {
 	if (player !== undefined) {
 		player.update();
+		timer.update();
 	}
 
 	enemies.forEach(function (enemy) {
@@ -137,7 +140,7 @@ function loop() {
 };
 
 loop();
-},{"./bullet":2,"./enemy":3,"./player":4}],2:[function(require,module,exports){
+},{"./bullet":2,"./enemy":3,"./player":4,"./timer.js":5}],2:[function(require,module,exports){
 module.exports = Bullet;
 var u = 0;
 
@@ -415,4 +418,33 @@ Player.prototype.input = function () {
 	}
 };
  
+},{}],5:[function(require,module,exports){
+module.exports = Timer;
+
+function Timer (options) {
+	var self = this;
+
+	this.color = "#fff";
+	this.start = new Date();
+
+	this.update = function () {
+		self.now = new Date();
+		self.plaing = self.now - self.start;
+	};
+
+	this.formateTime = function () {
+		self.milliseconds = Math.floor(new Date(self.plaing).getMilliseconds() / 100);
+		self.seconds = new Date(self.plaing).getSeconds();
+		if (self.seconds < 10) {self.seconds = '0' + self.seconds;}
+		self.minutes = new Date(self.plaing).getMinutes();
+		if (self.minutes < 10) {self.minutes = '0' + self.minutes;}
+		return self.minutes + ' : ' + self.seconds + ' . ' + self.milliseconds;
+	};
+
+	this.draw = function (context) {
+		context.fillStyle = self.color;
+		context.font = '20px sans-serif';
+		context.fillText (self.formateTime(), 10, 30);
+	};
+};
 },{}]},{},[1]);

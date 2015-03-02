@@ -1,6 +1,7 @@
 var Player = require("./player");
 var Bullet = require("./bullet");
 var Enemy = require("./enemy");
+var Timer = require("./timer.js");
 
 window.canvas = document.getElementById("game");
 var context = canvas.getContext("2d");
@@ -36,7 +37,7 @@ window.addEventListener("click", function (e) {
 });
 
 window.player = new Player ();
-
+window.timer = new Timer();
 window.enemies = [];
 
 for (var i = 0; i < 50; i++) {
@@ -93,11 +94,13 @@ function draw () {
 	enemies.forEach(function (enemy) {
 		enemy.draw(context);
 	});
+	timer.draw(context);
 };
 
 function update() {
 	if (player !== undefined) {
 		player.update();
+		timer.update();
 	}
 
 	enemies.forEach(function (enemy) {
