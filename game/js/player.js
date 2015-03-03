@@ -5,10 +5,11 @@ function Player (options) {
 
 	this.width = 20;
 	this.height = 20;
-	this.x = canvas.width/3;
+	this.radius = this.width/1.6;
+	this.x = canvas.width/4;
 	this.y = canvas.height/2;
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 	this.color = "#fff";
 	this.speed = 3;
 	this.friction = 0.95;
@@ -49,8 +50,8 @@ Player.prototype.move = function () {
 	this.y += this.velocity.y;
 	this.velocity.x *= this.friction;
 	this.velocity.y *= this.friction;
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 };
 
 Player.prototype.boundaries = function () {

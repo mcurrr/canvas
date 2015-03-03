@@ -7,10 +7,9 @@ function Bullet (options) {
 	this.u = u++;
 	this.x = options.x || 0;
 	this.y = options.y || 0;
-	this.width = options.width || 6;
-	this.height = options.height || 6;
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
+	this.radius = options.radius || 3;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 	this.color = options.color || "#fff";
 	this.speed = options.speed || 10;
 
@@ -24,8 +23,8 @@ function Bullet (options) {
 		y: 0
 	};
 
-	this.dx = (this.target.x - this.x);
-	this.dy = (this.target.y - this.y);
+	this.dx = (this.target.x - this.centerX);
+	this.dy = (this.target.y - this.centerY);
 	this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
 
 	/*
@@ -37,8 +36,8 @@ function Bullet (options) {
 		self.velocity.y = (self.dy / self.mag) * self.speed;
 		self.x += self.velocity.x;
 		self.y += self.velocity.y;
-		self.X = self.x + self.width;
-		self.Y = self.y + self.height;
+		self.centerX = self.x + self.radius;
+		self.centerY = self.y + self.radius;
 		self.boundaries();
 	};
 
@@ -47,41 +46,43 @@ function Bullet (options) {
 	*/
 
 	this.draw = function (context) {
+		context.save();
+		context.beginPath();
+		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
-		context.fillRect(
-			self.x - self.width / 2,
-			self.y - self.height / 2,
-			self.width,
-			self.height
-		);
+		context.fill();
+		context.lineWidth = 1;
+		context.strokeStyle = '#fff';
+		context.stroke();
+		context.restore();
 	};
 };
 
 Bullet.prototype.boundaries = function () {
-	if (this.x < 0) {
+	if (this.centerX - this.radius < 0) {
 		this.remove();
 	}
 
-	if (this.y < 0) {
+	if (this.centerY - this.radius < 0) {
 		this.remove();
 	}
 
-	if (this.x > canvas.width) {
+	if (this.centerX + this.radius > canvas.width) {
 		this.remove();
 	}
 
-	if (this.y > canvas.height) {
+	if (this.centerY + this.radius > canvas.height) {
 		this.remove();
 	}
 };
 
 Bullet.prototype.remove = function () {
-	console.clear();
-	statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
-	console.log(statistic);
+	// console.clear();
+	// statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
+	// console.log(statistic);
 	var del = find(bullets, this);
 	if (del != -1) {
-		bullets.splice(bullets[del], 1);
+		bullets.splice(del, 1);
 	}
 	else {
 	}

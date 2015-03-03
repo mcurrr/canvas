@@ -3,6 +3,7 @@ var Player = require("./player");
 var Bullet = require("./bullet");
 var Enemy = require("./enemy");
 var Timer = require("./timer.js");
+var Explode = require("./explode.js");
 
 window.canvas = document.getElementById("game");
 var context = canvas.getContext("2d");
@@ -11,9 +12,12 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 window.killed = 0;
-
 window.keys = {};
 window.bullets = [];
+window.enemies = [];
+window.explodes = [];
+window.player = new Player ();
+window.timer = new Timer();
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
@@ -24,8 +28,8 @@ window.addEventListener("keyup", function(e) {
 	delete keys[e.keyCode];
 });
 
-	window.statistic = 'Accuracy: 0%';
-	console.log(statistic);
+window.statistic = 'Accuracy: 0%';
+console.log(statistic);
 
 window.addEventListener("click", function (e) {
 	if (player !== undefined) {
@@ -37,16 +41,48 @@ window.addEventListener("click", function (e) {
 	}
 });
 
-window.player = new Player ();
-window.timer = new Timer();
-window.enemies = [];
-
-for (var i = 0; i < 50; i++) {
+function generateEnemy () {
 	enemies[enemies.length] = new Enemy ();
-}
+};
+
+function generateEnemies () {
+	for (var i = 0; enemies.length < 50; i++) {
+		generateEnemy();
+		for(var i=0; i<enemies.length; i++) {
+			if (enemies[i].u != enemies[enemies.length - 1].u) {
+				if(isColliding(enemies[i], enemies[enemies.length - 1])) {
+					enemies.splice(enemies.length-1, 1);
+				}
+			}
+		};
+	};
+};
+
+function generateExplode (enemy) {
+	for (var i = 0; i < 10; i++) {
+		explodes[explodes.length] = new Explode ({
+			centerX: enemy.centerX,
+			centerY: enemy.centerY,
+			color: enemy.color
+		});
+	};
+		console.log(enemy.u);
+		console.log(enemy.centerX);
+		console.log(explodes[0].centerX);
+};
+
+generateEnemies();
 
 function isColliding (a, b) {
-	return !((a.X < b.x) || (a.Y < b.y) || (b.X < a.x) || (b.Y < a.y));
+	var distX = a.centerX - b.centerX;
+	var distY = a.centerY - b.centerY;
+	var dist = Math.sqrt(distX * distX + distY * distY);
+	if (dist <= a.radius + b.radius) {
+		return true;
+	}
+	else {
+		return false;
+	}
 };
 
 function enemiesCollide(value) {
@@ -60,26 +96,10 @@ function enemiesCollide(value) {
 			}
 			else {
 				if(isColliding(enemies[i], value)) {
-					if (((enemies[i].direction.x > 0 && enemies[i].direction.y < 0) &&
-						 (value.direction.x > 0 && value.direction.y > 0)) ||
-						 ((enemies[i].direction.x < 0 && enemies[i].direction.y < 0) &&
-						 (value.direction.x < 0 && value.direction.y > 0))) {
-							value.direction.y *= -1;
-							enemies[i].direction.y *= -1;
-					}
-					else if (((enemies[i].direction.y > 0 && enemies[i].direction.x < 0) &&
-						 (value.direction.y > 0 && value.direction.x > 0)) ||
-						 ((enemies[i].direction.y < 0 && enemies[i].direction.x < 0) &&
-						 (value.direction.y < 0 && value.direction.x > 0))) {
-							value.direction.x *= -1;
-							enemies[i].direction.x *= -1;
-					}
-					else {
-						value.direction.x *= -1;
-						value.direction.y *= -1;
-						enemies[i].direction.x *= -1;
-						enemies[i].direction.y *= -1;
-					}
+					value.direction.x *= -1;
+					value.direction.y *= -1;
+					enemies[i].direction.x *= -1;
+					enemies[i].direction.y *= -1;
 				}
 			}
 		}
@@ -102,6 +122,11 @@ function draw () {
 			enemy.draw(context);
 		}
 	});
+	explodes.forEach(function (explode) {
+		if (player !== undefined) {
+			explode.draw(context);
+		}
+	});
 	timer.draw(context);
 };
 
@@ -114,6 +139,7 @@ function update() {
 	enemies.forEach(function (enemy) {
 		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
+				generateExplode(enemy);
 				enemy.remove();
 				player = undefined;
 				bullets = undefined;
@@ -127,6 +153,7 @@ function update() {
 					if (isColliding (bullet, enemy)) {
 						++killed;
 						bullet.remove();
+						generateExplode(enemy);
 						enemy.remove();
 					}
 				});
@@ -142,6 +169,11 @@ function update() {
 			bullet.update();
 		});
 	}
+	if (explodes !== undefined) {
+		explodes.forEach(function (explode) {
+			explode.update();
+		});
+	}
 };
 
 function loop() {
@@ -151,7 +183,7 @@ function loop() {
 };
 
 loop();
-},{"./bullet":2,"./enemy":3,"./player":4,"./timer.js":5}],2:[function(require,module,exports){
+},{"./bullet":2,"./enemy":3,"./explode.js":4,"./player":5,"./timer.js":6}],2:[function(require,module,exports){
 module.exports = Bullet;
 var u = 0;
 
@@ -161,10 +193,9 @@ function Bullet (options) {
 	this.u = u++;
 	this.x = options.x || 0;
 	this.y = options.y || 0;
-	this.width = options.width || 6;
-	this.height = options.height || 6;
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
+	this.radius = options.radius || 3;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 	this.color = options.color || "#fff";
 	this.speed = options.speed || 10;
 
@@ -178,8 +209,8 @@ function Bullet (options) {
 		y: 0
 	};
 
-	this.dx = (this.target.x - this.x);
-	this.dy = (this.target.y - this.y);
+	this.dx = (this.target.x - this.centerX);
+	this.dy = (this.target.y - this.centerY);
 	this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
 
 	/*
@@ -191,8 +222,8 @@ function Bullet (options) {
 		self.velocity.y = (self.dy / self.mag) * self.speed;
 		self.x += self.velocity.x;
 		self.y += self.velocity.y;
-		self.X = self.x + self.width;
-		self.Y = self.y + self.height;
+		self.centerX = self.x + self.radius;
+		self.centerY = self.y + self.radius;
 		self.boundaries();
 	};
 
@@ -201,41 +232,43 @@ function Bullet (options) {
 	*/
 
 	this.draw = function (context) {
+		context.save();
+		context.beginPath();
+		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
-		context.fillRect(
-			self.x - self.width / 2,
-			self.y - self.height / 2,
-			self.width,
-			self.height
-		);
+		context.fill();
+		context.lineWidth = 1;
+		context.strokeStyle = '#fff';
+		context.stroke();
+		context.restore();
 	};
 };
 
 Bullet.prototype.boundaries = function () {
-	if (this.x < 0) {
+	if (this.centerX - this.radius < 0) {
 		this.remove();
 	}
 
-	if (this.y < 0) {
+	if (this.centerY - this.radius < 0) {
 		this.remove();
 	}
 
-	if (this.x > canvas.width) {
+	if (this.centerX + this.radius > canvas.width) {
 		this.remove();
 	}
 
-	if (this.y > canvas.height) {
+	if (this.centerY + this.radius > canvas.height) {
 		this.remove();
 	}
 };
 
 Bullet.prototype.remove = function () {
-	console.clear();
-	statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
-	console.log(statistic);
+	// console.clear();
+	// statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
+	// console.log(statistic);
 	var del = find(bullets, this);
 	if (del != -1) {
-		bullets.splice(bullets[del], 1);
+		bullets.splice(del, 1);
 	}
 	else {
 	}
@@ -249,19 +282,18 @@ function Enemy (options) {
 	var self = this;
 
 	this.u = u++;
-	this.width = 25;
-	this.height = 25;
-	this.x = randomInt(canvas.width - this.width * 4, canvas.width - this.width * 2);
-	this.y = randomInt(0, canvas.height - this.height);
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
-	this.color = randomColor(0, 255, 0, 255, 0, 255, 0.8);
+	this.radius = 15;
+	this.x = randomInt(canvas.width - this.radius * 10, canvas.width - this.radius*3);
+	this.y = randomInt(0, canvas.height - this.radius * 2);
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
+	this.color = randomColor(0, 255, 0, 150, 0, 150, 0.8);
 	this.speed = 20;
 	this.friction = 0.9;
 
 	this.direction = {
-		x: randomInt(-5, -10),
-		y: randomInt(-5, 5)
+		x: randomInt(-10, -70),
+		y: randomInt(-50, 50)
 	};
 
 	this.velocity = {
@@ -273,38 +305,55 @@ function Enemy (options) {
 		self.move();
 		// self.grow();
 		self.boundaries();
-		self.speed += 0.01;
+		self.speed += 0.005;
 	};
 
 	this.draw = function (context) {
-			context.fillStyle = self.color;
-			context.fillRect (self.x, self.y, self.width, self.height);
+		context.save();
+		// context.translate(self.x, self.y);
+		context.beginPath();
+		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
+		context.fillStyle = self.color;
+		context.fill();
+		context.lineWidth = 1;
+		context.strokeStyle = '#000000';
+		context.stroke();
+		context.restore();
 	};
 };
 
 Enemy.prototype.move = function () {
-	this.x += Math.round(0.01 * this.speed * this.direction.x);
-	this.y += Math.round(0.01 * this.speed * this.direction.y);
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
+	this.x += 0.001 * this.speed * this.direction.x;
+	this.y += 0.001 * this.speed * this.direction.y;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 };
 
 Enemy.prototype.grow = function () {
-	this.width += 0.01;
-	this.height += 0.01;
+	this.radius += 0.01;
 };
 
 Enemy.prototype.boundaries = function () {
-	if (this.x <= 0 || this.x >= canvas.width-this.width) {
+	if (this.x <= 0 || this.centerX + this.radius >= canvas.width) {
 		this.direction.x *= -1;
 	}
-	if (this.y <= 0 || this.y >= canvas.height-this.height) {
+	if (this.y <= 0 || this.centerY + this.radius >= canvas.height) {
 		this.direction.y *= -1;
 	}
 };
 
 function randomInt (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+Enemy.prototype.reload = function () {
+	var del = find(enemies, this);
+	if (del != -1) {
+		enemies.splice(del, 1, enemies[del] = new Enemy());
+	}
+	else {
+		console.log('error!');
+	}
 };
 
 Enemy.prototype.remove = function () {
@@ -324,15 +373,69 @@ function find(array, value) {
 			}
 		}
 	return -1;
-}
- 
+};
+
 function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
 	var r = randomInt(rmin, rmax);
 	var g = randomInt(gmin, gmax);
 	var b = randomInt(bmin, bmax);
 	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 };
+
 },{}],4:[function(require,module,exports){
+module.exports = Explode;
+var angle = 0;
+
+function Explode (options) {
+	var self = this;
+
+	this.centerX = options.centerX;
+	this.centerY = options.centerY;
+	this.radius = randomInt(2, 10);
+	this.color = options.color || "#000";
+	this.speed = randomInt(20, 50);
+	this.scale = randomInt(1, 4);
+	this.velocity = {
+		x: this.speed * Math.cos(this.angle * Math.PI / 180),
+		y: this.speed * Math.sin(this.angle * Math.PI / 180)
+	};
+	this.angle = angle;
+	if (angle >= 360) {
+		angle = 0;
+	} 
+	else {
+		angle += 36;
+	}
+
+	this.update = function (dt) {
+		this.scale -= this.scale;
+		if (this.scale <= 0) {
+			this.scale = 0;
+		}
+		self.move();
+	};
+
+	this.draw = function (context) {
+		context.save();
+		context.scale(self.scale, self.scale);
+		context.beginPath();
+		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
+		context.fillStyle = self.color;
+		context.fill();
+		context.restore();
+	};
+
+};
+
+Explode.prototype.move = function () {
+	this.centerX += this.velocity.x;
+	this.centerY += this.velocity.y;
+};
+
+function randomInt (min, max) {
+	return Math.floor(Math.random() * (max - min + 1) + min);
+};
+},{}],5:[function(require,module,exports){
 module.exports = Player;
 
 function Player (options) {
@@ -340,10 +443,11 @@ function Player (options) {
 
 	this.width = 20;
 	this.height = 20;
-	this.x = canvas.width/3;
+	this.radius = this.width/1.6;
+	this.x = canvas.width/4;
 	this.y = canvas.height/2;
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 	this.color = "#fff";
 	this.speed = 3;
 	this.friction = 0.95;
@@ -384,8 +488,8 @@ Player.prototype.move = function () {
 	this.y += this.velocity.y;
 	this.velocity.x *= this.friction;
 	this.velocity.y *= this.friction;
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 };
 
 Player.prototype.boundaries = function () {
@@ -429,7 +533,7 @@ Player.prototype.input = function () {
 	}
 };
  
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = Timer;
 
 function Timer (options) {

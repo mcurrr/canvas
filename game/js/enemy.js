@@ -5,19 +5,18 @@ function Enemy (options) {
 	var self = this;
 
 	this.u = u++;
-	this.width = 25;
-	this.height = 25;
-	this.x = randomInt(canvas.width - this.width * 4, canvas.width - this.width * 2);
-	this.y = randomInt(0, canvas.height - this.height);
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
-	this.color = randomColor(0, 255, 0, 255, 0, 255, 0.8);
+	this.radius = 15;
+	this.x = randomInt(canvas.width - this.radius * 10, canvas.width - this.radius*3);
+	this.y = randomInt(0, canvas.height - this.radius * 2);
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
+	this.color = randomColor(0, 255, 0, 150, 0, 150, 0.8);
 	this.speed = 20;
 	this.friction = 0.9;
 
 	this.direction = {
-		x: randomInt(-5, -10),
-		y: randomInt(-5, 5)
+		x: randomInt(-10, -70),
+		y: randomInt(-50, 50)
 	};
 
 	this.velocity = {
@@ -29,38 +28,55 @@ function Enemy (options) {
 		self.move();
 		// self.grow();
 		self.boundaries();
-		self.speed += 0.01;
+		self.speed += 0.005;
 	};
 
 	this.draw = function (context) {
-			context.fillStyle = self.color;
-			context.fillRect (self.x, self.y, self.width, self.height);
+		context.save();
+		// context.translate(self.x, self.y);
+		context.beginPath();
+		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
+		context.fillStyle = self.color;
+		context.fill();
+		context.lineWidth = 1;
+		context.strokeStyle = '#000000';
+		context.stroke();
+		context.restore();
 	};
 };
 
 Enemy.prototype.move = function () {
-	this.x += Math.round(0.01 * this.speed * this.direction.x);
-	this.y += Math.round(0.01 * this.speed * this.direction.y);
-	this.X = this.x + this.width;
-	this.Y = this.y + this.height;
+	this.x += 0.001 * this.speed * this.direction.x;
+	this.y += 0.001 * this.speed * this.direction.y;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 };
 
 Enemy.prototype.grow = function () {
-	this.width += 0.01;
-	this.height += 0.01;
+	this.radius += 0.01;
 };
 
 Enemy.prototype.boundaries = function () {
-	if (this.x <= 0 || this.x >= canvas.width-this.width) {
+	if (this.x <= 0 || this.centerX + this.radius >= canvas.width) {
 		this.direction.x *= -1;
 	}
-	if (this.y <= 0 || this.y >= canvas.height-this.height) {
+	if (this.y <= 0 || this.centerY + this.radius >= canvas.height) {
 		this.direction.y *= -1;
 	}
 };
 
 function randomInt (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+Enemy.prototype.reload = function () {
+	var del = find(enemies, this);
+	if (del != -1) {
+		enemies.splice(del, 1, enemies[del] = new Enemy());
+	}
+	else {
+		console.log('error!');
+	}
 };
 
 Enemy.prototype.remove = function () {
@@ -80,8 +96,8 @@ function find(array, value) {
 			}
 		}
 	return -1;
-}
- 
+};
+
 function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
 	var r = randomInt(rmin, rmax);
 	var g = randomInt(gmin, gmax);
