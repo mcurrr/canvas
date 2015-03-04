@@ -37,6 +37,10 @@ function Player (options) {
 
 	this.draw = function (context) {
 		context.save();
+		context.shadowColor = '#888';
+		context.shadowBlur = 10;
+		context.shadowOffsetX = 10;
+		context.shadowOffsetY = 10;
 		context.translate(self.x + self.width/2, self.y + self.height/2);
 		context.rotate(Math.PI/180 * self.ang);
 		context.fillStyle = self.color;

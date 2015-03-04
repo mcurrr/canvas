@@ -40,7 +40,10 @@ function Explode (options) {
 
 	this.draw = function (context) {
 		context.save();
-		// context.translate(self.x, self.y);
+		context.shadowColor = '#666';
+		context.shadowBlur = 10;
+		context.shadowOffsetX = 10;
+		context.shadowOffsetY = 10;
 		context.scale(self.scale, self.scale);
 		context.beginPath();
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);

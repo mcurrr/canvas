@@ -233,6 +233,10 @@ function Bullet (options) {
 
 	this.draw = function (context) {
 		context.save();
+		context.shadowColor = '#666';
+		context.shadowBlur = 10;
+		context.shadowOffsetX = 10;
+		context.shadowOffsetY = 10;
 		context.beginPath();
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
@@ -320,7 +324,10 @@ function Enemy (options) {
 
 	this.draw = function (context) {
 		context.save();
-		// context.translate(self.x, self.y);
+		context.shadowColor = '#666';
+		context.shadowBlur = 10;
+		context.shadowOffsetX = 10;
+		context.shadowOffsetY = 10;
 		context.beginPath();
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
@@ -432,7 +439,10 @@ function Explode (options) {
 
 	this.draw = function (context) {
 		context.save();
-		// context.translate(self.x, self.y);
+		context.shadowColor = '#666';
+		context.shadowBlur = 10;
+		context.shadowOffsetX = 10;
+		context.shadowOffsetY = 10;
 		context.scale(self.scale, self.scale);
 		context.beginPath();
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
@@ -510,6 +520,10 @@ function Player (options) {
 
 	this.draw = function (context) {
 		context.save();
+		context.shadowColor = '#888';
+		context.shadowBlur = 10;
+		context.shadowOffsetX = 10;
+		context.shadowOffsetY = 10;
 		context.translate(self.x + self.width/2, self.y + self.height/2);
 		context.rotate(Math.PI/180 * self.ang);
 		context.fillStyle = self.color;
