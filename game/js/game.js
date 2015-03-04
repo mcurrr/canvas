@@ -45,7 +45,7 @@ function generateEnemy () {
 };
 
 function generateEnemies () {
-	for (var i = 0; enemies.length < 50; i++) {
+	for (var i = 0; enemies.length < 20; i++) {
 		generateEnemy();
 		for(var i=0; i<enemies.length; i++) {
 			if (enemies[i].u != enemies[enemies.length - 1].u) {
@@ -57,13 +57,14 @@ function generateEnemies () {
 	};
 };
 
-function generateExplode (obj) {
-	for (var i = 0; i < 20; i++) {
+function generateExplode (obj1, obj2) {
+	for (var i = 0, ang = obj2.getDegrees() - 90; i < 10; i++, ang += 18) {
 		explodes[explodes.length] = new Explode ({
-			x: obj.x,
-			y: obj.y,
-			color: obj.color,
-			Oradius: obj.radius
+			x: obj1.x,
+			y: obj1.y,
+			color: obj1.color,
+			Oradius: obj1.radius,
+			angle: ang
 		});
 	};
 };
@@ -136,9 +137,9 @@ function update() {
 	enemies.forEach(function (enemy) {
 		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
-				generateExplode(enemy);
+				generateExplode(enemy, player);
 				enemy.remove();
-				generateExplode(player);
+				generateExplode(player, enemy);
 				player = undefined;
 				bullets = undefined;
 				console.clear();
@@ -151,7 +152,7 @@ function update() {
 					if (isColliding (bullet, enemy)) {
 						++killed;
 						bullet.remove();
-						generateExplode(enemy);
+						generateExplode(enemy, bullet);
 						enemy.remove();
 					}
 				});

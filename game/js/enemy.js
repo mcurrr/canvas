@@ -26,7 +26,7 @@ function Enemy (options) {
 
 	this.update = function (dt) {
 		self.move();
-		self.grow();
+		// self.grow();
 		self.boundaries();
 		self.speed += 0.005;
 	};

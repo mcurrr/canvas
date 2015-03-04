@@ -5,8 +5,16 @@ function Bullet (options) {
 	var self = this;
 
 	this.u = u++;
+	this.pre = {
+		x: 0,
+		y: 0
+	};
 	this.x = options.x || 0;
 	this.y = options.y || 0;
+	this.vec = {
+		x: 0,
+		y: 0
+	};
 	this.radius = options.radius || 3;
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
@@ -34,6 +42,8 @@ function Bullet (options) {
 	this.update = function (dt) {
 		self.velocity.x = (self.dx / self.mag) * self.speed;
 		self.velocity.y = (self.dy / self.mag) * self.speed;
+		self.pre.x = self.x;
+		self.pre.y = self.y;
 		self.x += self.velocity.x;
 		self.y += self.velocity.y;
 		self.centerX = self.x + self.radius;
@@ -100,4 +110,25 @@ function find(array, value) {
 			}
 		}
 	return -1;
+};
+
+Bullet.prototype.getDegrees = function () {
+	var degrees = 0;
+	this.vec.x = this.x - this.pre.x;
+	this.vec.y = this.y - this.pre.y;
+	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+
+	if (this.vec.x > 0 && this.vec.y > 0) {
+		degrees = degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y > 0) {
+		degrees = 180 - degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y < 0) {
+		degrees = 270 - (degrees * -1);
+	}
+		if (this.vec.x > 0 && this.vec.y < 0) {
+		degrees = 360 - (degrees * -1);
+	}
+	return degrees;
 };

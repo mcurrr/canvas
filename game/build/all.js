@@ -46,7 +46,7 @@ function generateEnemy () {
 };
 
 function generateEnemies () {
-	for (var i = 0; enemies.length < 50; i++) {
+	for (var i = 0; enemies.length < 20; i++) {
 		generateEnemy();
 		for(var i=0; i<enemies.length; i++) {
 			if (enemies[i].u != enemies[enemies.length - 1].u) {
@@ -58,13 +58,14 @@ function generateEnemies () {
 	};
 };
 
-function generateExplode (obj) {
-	for (var i = 0; i < 20; i++) {
+function generateExplode (obj1, obj2) {
+	for (var i = 0, ang = obj2.getDegrees() - 90; i < 10; i++, ang += 18) {
 		explodes[explodes.length] = new Explode ({
-			x: obj.x,
-			y: obj.y,
-			color: obj.color,
-			Oradius: obj.radius
+			x: obj1.x,
+			y: obj1.y,
+			color: obj1.color,
+			Oradius: obj1.radius,
+			angle: ang
 		});
 	};
 };
@@ -137,9 +138,9 @@ function update() {
 	enemies.forEach(function (enemy) {
 		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
-				generateExplode(enemy);
+				generateExplode(enemy, player);
 				enemy.remove();
-				generateExplode(player);
+				generateExplode(player, enemy);
 				player = undefined;
 				bullets = undefined;
 				console.clear();
@@ -152,7 +153,7 @@ function update() {
 					if (isColliding (bullet, enemy)) {
 						++killed;
 						bullet.remove();
-						generateExplode(enemy);
+						generateExplode(enemy, bullet);
 						enemy.remove();
 					}
 				});
@@ -192,8 +193,16 @@ function Bullet (options) {
 	var self = this;
 
 	this.u = u++;
+	this.pre = {
+		x: 0,
+		y: 0
+	};
 	this.x = options.x || 0;
 	this.y = options.y || 0;
+	this.vec = {
+		x: 0,
+		y: 0
+	};
 	this.radius = options.radius || 3;
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
@@ -221,6 +230,8 @@ function Bullet (options) {
 	this.update = function (dt) {
 		self.velocity.x = (self.dx / self.mag) * self.speed;
 		self.velocity.y = (self.dy / self.mag) * self.speed;
+		self.pre.x = self.x;
+		self.pre.y = self.y;
 		self.x += self.velocity.x;
 		self.y += self.velocity.y;
 		self.centerX = self.x + self.radius;
@@ -289,6 +300,26 @@ function find(array, value) {
 	return -1;
 };
 
+Bullet.prototype.getDegrees = function () {
+	var degrees = 0;
+	this.vec.x = this.x - this.pre.x;
+	this.vec.y = this.y - this.pre.y;
+	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+
+	if (this.vec.x > 0 && this.vec.y > 0) {
+		degrees = degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y > 0) {
+		degrees = 180 - degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y < 0) {
+		degrees = 270 - (degrees * -1);
+	}
+		if (this.vec.x > 0 && this.vec.y < 0) {
+		degrees = 360 - (degrees * -1);
+	}
+	return degrees;
+};
 },{}],3:[function(require,module,exports){
 module.exports = Enemy;
 var u = 0;
@@ -318,7 +349,7 @@ function Enemy (options) {
 
 	this.update = function (dt) {
 		self.move();
-		self.grow();
+		// self.grow();
 		self.boundaries();
 		self.speed += 0.005;
 	};
@@ -399,7 +430,6 @@ function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
 
 },{}],4:[function(require,module,exports){
 module.exports = Explode;
-var angle = 0;
 var u = 0;
 
 function Explode (options) {
@@ -408,6 +438,7 @@ function Explode (options) {
 	this.u = u++;
 	this.x = options.x || 0;
 	this.y = options.y || 0;
+	this.angle = options.angle || 0;
 	this.Oradius = options.Oradius || 10;
 	this.radius = randomInt(2, Math.floor(this.Oradius / 2));
 	this.centerX = this.x + this.radius;
@@ -416,13 +447,6 @@ function Explode (options) {
 	this.speed = randomInt(5, 10);
 	this.scale = 1;
 	this.scaleSpeed = randomInt(1, 4);
-	this.angle = angle;
-	if (angle >= 360) {
-		angle = 0;
-	} 
-	else {
-		angle += 18;
-	}
 
 	this.velocity = {
 		x: this.speed * Math.cos(this.angle * Math.PI / 180),

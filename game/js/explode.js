@@ -1,5 +1,4 @@
 module.exports = Explode;
-var angle = 0;
 var u = 0;
 
 function Explode (options) {
@@ -8,6 +7,7 @@ function Explode (options) {
 	this.u = u++;
 	this.x = options.x || 0;
 	this.y = options.y || 0;
+	this.angle = options.angle || 0;
 	this.Oradius = options.Oradius || 10;
 	this.radius = randomInt(2, Math.floor(this.Oradius / 2));
 	this.centerX = this.x + this.radius;
@@ -16,13 +16,6 @@ function Explode (options) {
 	this.speed = randomInt(5, 10);
 	this.scale = 1;
 	this.scaleSpeed = randomInt(1, 4);
-	this.angle = angle;
-	if (angle >= 360) {
-		angle = 0;
-	} 
-	else {
-		angle += 18;
-	}
 
 	this.velocity = {
 		x: this.speed * Math.cos(this.angle * Math.PI / 180),
