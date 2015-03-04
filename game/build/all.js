@@ -59,16 +59,14 @@ function generateEnemies () {
 };
 
 function generateExplode (enemy) {
-	for (var i = 0; i < 10; i++) {
+	for (var i = 0; i < 20; i++) {
 		explodes[explodes.length] = new Explode ({
-			centerX: enemy.centerX,
-			centerY: enemy.centerY,
-			color: enemy.color
+			x: enemy.x,
+			y: enemy.y,
+			color: enemy.color,
+			Eradius: enemy.radius
 		});
 	};
-		console.log(enemy.u);
-		console.log(enemy.centerX);
-		console.log(explodes[0].centerX);
 };
 
 generateEnemies();
@@ -109,7 +107,7 @@ function enemiesCollide(value) {
 
 function draw () {
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	context.fillStyle = "#ef4e12";
+	context.fillStyle = "#F7A688";
 	context.fillRect (0, 0, canvas.width, canvas.height);
 	if (player !== undefined) {
 		player.draw(context);
@@ -123,7 +121,7 @@ function draw () {
 		}
 	});
 	explodes.forEach(function (explode) {
-		if (player !== undefined) {
+		if (player !== undefined && explode !== undefined) {
 			explode.draw(context);
 		}
 	});
@@ -171,7 +169,9 @@ function update() {
 	}
 	if (explodes !== undefined) {
 		explodes.forEach(function (explode) {
-			explode.update();
+			if (explode !== undefined) {
+				explode.update();
+			}
 		});
 	}
 };
@@ -271,7 +271,17 @@ Bullet.prototype.remove = function () {
 		bullets.splice(del, 1);
 	}
 	else {
+		console.log("imposibru!");
 	}
+};
+
+function find(array, value) {
+	for(var i=0; i<array.length; i++) {
+		if (value !== undefined && array[i] !== undefined) {
+			if (array[i].u == value.u) return i;
+			}
+		}
+	return -1;
 };
 
 },{}],3:[function(require,module,exports){
@@ -303,7 +313,7 @@ function Enemy (options) {
 
 	this.update = function (dt) {
 		self.move();
-		// self.grow();
+		self.grow();
 		self.boundaries();
 		self.speed += 0.005;
 	};
@@ -315,9 +325,6 @@ function Enemy (options) {
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
 		context.fill();
-		context.lineWidth = 1;
-		context.strokeStyle = '#000000';
-		context.stroke();
 		context.restore();
 	};
 };
@@ -385,38 +392,47 @@ function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
 },{}],4:[function(require,module,exports){
 module.exports = Explode;
 var angle = 0;
+var u = 0;
 
 function Explode (options) {
 	var self = this;
 
-	this.centerX = options.centerX;
-	this.centerY = options.centerY;
-	this.radius = randomInt(2, 10);
+	this.u = u++;
+	this.x = options.x || 0;
+	this.y = options.y || 0;
+	this.Eradius = options.Eradius || 10;
+	this.radius = randomInt(2, Math.floor(this.Eradius / 2));
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 	this.color = options.color || "#000";
-	this.speed = randomInt(20, 50);
-	this.scale = randomInt(1, 4);
-	this.velocity = {
-		x: this.speed * Math.cos(this.angle * Math.PI / 180),
-		y: this.speed * Math.sin(this.angle * Math.PI / 180)
-	};
+	this.speed = randomInt(5, 10);
+	this.scale = 1;
+	this.scaleSpeed = randomInt(1, 4);
 	this.angle = angle;
 	if (angle >= 360) {
 		angle = 0;
 	} 
 	else {
-		angle += 36;
+		angle += 18;
 	}
 
+	this.velocity = {
+		x: this.speed * Math.cos(this.angle * Math.PI / 180),
+		y: this.speed * Math.sin(this.angle * Math.PI / 180)
+	};
+
 	this.update = function (dt) {
-		this.scale -= this.scale;
-		if (this.scale <= 0) {
-			this.scale = 0;
+		this.radius -= this.scaleSpeed / 5;
+		if (this.radius <= 0) {
+			this.radius = 0;
+			this.remove();
 		}
 		self.move();
 	};
 
 	this.draw = function (context) {
 		context.save();
+		// context.translate(self.x, self.y);
 		context.scale(self.scale, self.scale);
 		context.beginPath();
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
@@ -430,6 +446,25 @@ function Explode (options) {
 Explode.prototype.move = function () {
 	this.centerX += this.velocity.x;
 	this.centerY += this.velocity.y;
+};
+
+Explode.prototype.remove = function () {
+	var del = find(explodes, this);
+	if (del != -1) {
+		explodes.splice(del, 1);
+	}
+	else {
+		console.log("imposibru!");
+	}
+};
+
+function find(array, value) {
+	for(var i=0; i<array.length; i++) {
+		if (value !== undefined && array[i] !== undefined) {
+			if (array[i].u == value.u) return i;
+			}
+		}
+	return -1;
 };
 
 function randomInt (min, max) {

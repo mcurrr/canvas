@@ -1,37 +1,46 @@
 module.exports = Explode;
 var angle = 0;
+var u = 0;
 
 function Explode (options) {
 	var self = this;
 
-	this.centerX = options.centerX;
-	this.centerY = options.centerY;
-	this.radius = randomInt(2, 10);
+	this.u = u++;
+	this.x = options.x || 0;
+	this.y = options.y || 0;
+	this.Eradius = options.Eradius || 10;
+	this.radius = randomInt(2, Math.floor(this.Eradius / 2));
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
 	this.color = options.color || "#000";
-	this.speed = randomInt(20, 50);
-	this.scale = randomInt(1, 4);
-	this.velocity = {
-		x: this.speed * Math.cos(this.angle * Math.PI / 180),
-		y: this.speed * Math.sin(this.angle * Math.PI / 180)
-	};
+	this.speed = randomInt(5, 10);
+	this.scale = 1;
+	this.scaleSpeed = randomInt(1, 4);
 	this.angle = angle;
 	if (angle >= 360) {
 		angle = 0;
 	} 
 	else {
-		angle += 36;
+		angle += 18;
 	}
 
+	this.velocity = {
+		x: this.speed * Math.cos(this.angle * Math.PI / 180),
+		y: this.speed * Math.sin(this.angle * Math.PI / 180)
+	};
+
 	this.update = function (dt) {
-		this.scale -= this.scale;
-		if (this.scale <= 0) {
-			this.scale = 0;
+		this.radius -= this.scaleSpeed / 5;
+		if (this.radius <= 0) {
+			this.radius = 0;
+			this.remove();
 		}
 		self.move();
 	};
 
 	this.draw = function (context) {
 		context.save();
+		// context.translate(self.x, self.y);
 		context.scale(self.scale, self.scale);
 		context.beginPath();
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
@@ -45,6 +54,25 @@ function Explode (options) {
 Explode.prototype.move = function () {
 	this.centerX += this.velocity.x;
 	this.centerY += this.velocity.y;
+};
+
+Explode.prototype.remove = function () {
+	var del = find(explodes, this);
+	if (del != -1) {
+		explodes.splice(del, 1);
+	}
+	else {
+		console.log("imposibru!");
+	}
+};
+
+function find(array, value) {
+	for(var i=0; i<array.length; i++) {
+		if (value !== undefined && array[i] !== undefined) {
+			if (array[i].u == value.u) return i;
+			}
+		}
+	return -1;
 };
 
 function randomInt (min, max) {

@@ -58,16 +58,14 @@ function generateEnemies () {
 };
 
 function generateExplode (enemy) {
-	for (var i = 0; i < 10; i++) {
+	for (var i = 0; i < 20; i++) {
 		explodes[explodes.length] = new Explode ({
-			centerX: enemy.centerX,
-			centerY: enemy.centerY,
-			color: enemy.color
+			x: enemy.x,
+			y: enemy.y,
+			color: enemy.color,
+			Eradius: enemy.radius
 		});
 	};
-		console.log(enemy.u);
-		console.log(enemy.centerX);
-		console.log(explodes[0].centerX);
 };
 
 generateEnemies();
@@ -108,7 +106,7 @@ function enemiesCollide(value) {
 
 function draw () {
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	context.fillStyle = "#ef4e12";
+	context.fillStyle = "#F7A688";
 	context.fillRect (0, 0, canvas.width, canvas.height);
 	if (player !== undefined) {
 		player.draw(context);
@@ -122,7 +120,7 @@ function draw () {
 		}
 	});
 	explodes.forEach(function (explode) {
-		if (player !== undefined) {
+		if (player !== undefined && explode !== undefined) {
 			explode.draw(context);
 		}
 	});
@@ -170,7 +168,9 @@ function update() {
 	}
 	if (explodes !== undefined) {
 		explodes.forEach(function (explode) {
-			explode.update();
+			if (explode !== undefined) {
+				explode.update();
+			}
 		});
 	}
 };

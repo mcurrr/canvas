@@ -85,5 +85,15 @@ Bullet.prototype.remove = function () {
 		bullets.splice(del, 1);
 	}
 	else {
+		console.log("imposibru!");
 	}
+};
+
+function find(array, value) {
+	for(var i=0; i<array.length; i++) {
+		if (value !== undefined && array[i] !== undefined) {
+			if (array[i].u == value.u) return i;
+			}
+		}
+	return -1;
 };

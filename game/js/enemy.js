@@ -26,7 +26,7 @@ function Enemy (options) {
 
 	this.update = function (dt) {
 		self.move();
-		// self.grow();
+		self.grow();
 		self.boundaries();
 		self.speed += 0.005;
 	};
@@ -38,9 +38,6 @@ function Enemy (options) {
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
 		context.fill();
-		context.lineWidth = 1;
-		context.strokeStyle = '#000000';
-		context.stroke();
 		context.restore();
 	};
 };
