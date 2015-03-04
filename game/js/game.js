@@ -57,13 +57,13 @@ function generateEnemies () {
 	};
 };
 
-function generateExplode (enemy) {
+function generateExplode (obj) {
 	for (var i = 0; i < 20; i++) {
 		explodes[explodes.length] = new Explode ({
-			x: enemy.x,
-			y: enemy.y,
-			color: enemy.color,
-			Eradius: enemy.radius
+			x: obj.x,
+			y: obj.y,
+			color: obj.color,
+			Oradius: obj.radius
 		});
 	};
 };
@@ -120,7 +120,7 @@ function draw () {
 		}
 	});
 	explodes.forEach(function (explode) {
-		if (player !== undefined && explode !== undefined) {
+		if (explode !== undefined) {
 			explode.draw(context);
 		}
 	});
@@ -138,6 +138,7 @@ function update() {
 			if (isColliding (player, enemy)) {
 				generateExplode(enemy);
 				enemy.remove();
+				generateExplode(player);
 				player = undefined;
 				bullets = undefined;
 				console.clear();

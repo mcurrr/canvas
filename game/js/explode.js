@@ -8,8 +8,8 @@ function Explode (options) {
 	this.u = u++;
 	this.x = options.x || 0;
 	this.y = options.y || 0;
-	this.Eradius = options.Eradius || 10;
-	this.radius = randomInt(2, Math.floor(this.Eradius / 2));
+	this.Oradius = options.Oradius || 10;
+	this.radius = randomInt(2, Math.floor(this.Oradius / 2));
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
 	this.color = options.color || "#000";
