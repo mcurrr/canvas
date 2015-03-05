@@ -47,7 +47,7 @@ window.addEventListener("keyup", function(e) {
 window.statistic = 'Accuracy: 0%';
 console.log(statistic);
 
-window.addEventListener("click", function (e) {
+window.addEventListener("mousemove", function (e) {
 	if (player !== undefined) {
 		bullets[bullets.length] = new Bullet({
 			x: player.x + player.width / 2,
@@ -77,14 +77,14 @@ function generateEnemies () {
 };
 
 function generateExplode (obj1, obj2) {
-	if (obj2 instanceof Player) {
+	if (obj1 instanceof Player) {
 		var ang = 0;
 	}
 	else {
 		var ang = obj2.getDegrees() - 45;
 	}
 	for (var i = 0; i < 20; i++) {
-		if (obj2 instanceof Player) {
+		if (obj1 instanceof Player) {
 			ang += 18;
 		}
 		else {
@@ -187,7 +187,7 @@ function update() {
 	enemies.forEach(function (enemy) {
 		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
-				generateExplode(enemy, player);
+				generateExplode(player, enemy);
 				player = undefined;
 				bullets = undefined;
 				console.clear();
