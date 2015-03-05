@@ -5,12 +5,12 @@ function Bullet (options) {
 	var self = this;
 
 	this.u = u++;
+	this.x = options.x || 0;
+	this.y = options.y || 0;
 	this.pre = {
 		x: 0,
 		y: 0
 	};
-	this.x = options.x || 0;
-	this.y = options.y || 0;
 	this.vec = {
 		x: 0,
 		y: 0
@@ -18,8 +18,8 @@ function Bullet (options) {
 	this.radius = options.radius || 3;
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = options.color || "#fff";
-	this.speed = options.speed || 10;
+	this.color = options.color || "#000";
+	this.speed = options.speed || 35;
 
 	this.target = {
 		x: options.target.x,
@@ -81,11 +81,11 @@ Bullet.prototype.boundaries = function () {
 		this.remove();
 	}
 
-	if (this.centerX + this.radius > canvas.width) {
+	if (this.centerX + this.radius > canvas2.width) {
 		this.remove();
 	}
 
-	if (this.centerY + this.radius > canvas.height) {
+	if (this.centerY + this.radius > canvas2.height) {
 		this.remove();
 	}
 };

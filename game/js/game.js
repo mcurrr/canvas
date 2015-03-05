@@ -4,11 +4,28 @@ var Enemy = require("./enemy");
 var Timer = require("./timer.js");
 var Explode = require("./explode.js");
 
-window.canvas = document.getElementById("game");
-var context = canvas.getContext("2d");
+window.canvas0 = document.getElementById("layer0");
+var context0 = canvas0.getContext("2d");
+canvas0.width = window.innerWidth;
+canvas0.height = window.innerHeight;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+var img = new Image();
+img.src = './img/background.png';
+img.onload = function () {
+	var pattern = context0.createPattern(img, 'repeat');
+	context0.fillStyle = pattern;
+	context0.fillRect(0, 0, canvas0.width, canvas0.height);
+};
+
+window.canvas1 = document.getElementById("layer1");
+var context1 = canvas1.getContext("2d");
+canvas1.width = window.innerWidth;
+canvas1.height = window.innerHeight;
+
+window.canvas2 = document.getElementById("layer2");
+var context2 = canvas2.getContext("2d");
+canvas2.width = window.innerWidth;
+canvas2.height = window.innerHeight;
 
 window.killed = 0;
 window.keys = {};
@@ -20,7 +37,6 @@ window.timer = new Timer();
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
-	// e.preventDefault();
 });
 
 window.addEventListener("keyup", function(e) {
@@ -41,7 +57,9 @@ window.addEventListener("click", function (e) {
 });
 
 function generateEnemy () {
-	enemies[enemies.length] = new Enemy ();
+	enemies[enemies.length] = new Enemy (/*{
+		targetPlayer: {x: player.x, y: player.y}
+	}*/);
 };
 
 function generateEnemies () {
@@ -58,7 +76,19 @@ function generateEnemies () {
 };
 
 function generateExplode (obj1, obj2) {
-	for (var i = 0, ang = obj2.getDegrees() - 90; i < 20; i++, ang += 9) {
+	if (obj2 instanceof Player) {
+		var ang = 0;
+	}
+	else {
+		var ang = obj2.getDegrees() - 45;
+	}
+	for (var i = 0; i < 20; i++) {
+		if (obj2 instanceof Player) {
+			ang += 18;
+		}
+		else {
+			ang += 4.5;
+		}
 		explodes[explodes.length] = new Explode ({
 			x: obj1.x,
 			y: obj1.y,
@@ -69,7 +99,15 @@ function generateExplode (obj1, obj2) {
 	};
 };
 
-generateEnemies();
+generateEnemies(player);
+
+window.getPlayerX = function (player) {
+	return player.x;
+};
+
+window.getPlayerY = function (player) {
+	return player.y;
+};
 
 function isColliding (a, b) {
 	var distX = a.centerX - b.centerX;
@@ -104,28 +142,39 @@ function enemiesCollide(value) {
 	};
 };
 
+function drawLayer0 () {
+	// context0.fillStyle = "rgba(216, 111, 51, 1)";
+	// context0.fillRect (0, 0, canvas0.width, canvas0.height);
 
-function draw () {
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	context.fillStyle = "#F7A688";
-	context.fillRect (0, 0, canvas.width, canvas.height);
+};
+
+function drawLayer1 () {
+	explodes.forEach(function (explode) {
+		if (explode !== undefined) {
+			explode.draw(context1);
+		}
+	});
+};
+
+function drawLayer2 () {
+	context2.clearRect(0, 0, canvas2.width, canvas2.height);
 	if (player !== undefined) {
-		player.draw(context);
+		player.draw(context2);
 		bullets.forEach(function (bullet) {
-			bullet.draw(context);
+			bullet.draw(context2);
 		});
 	}
 	enemies.forEach(function (enemy) {
 		if (enemy !== undefined) {
-			enemy.draw(context);
+			enemy.draw(context2);
 		}
 	});
 	explodes.forEach(function (explode) {
 		if (explode !== undefined) {
-			explode.draw(context);
+			explode.draw(context2);
 		}
 	});
-	timer.draw(context);
+	timer.draw(context2, canvas2);
 };
 
 function update() {
@@ -138,8 +187,6 @@ function update() {
 		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
 				generateExplode(enemy, player);
-				enemy.remove();
-				generateExplode(player, enemy);
 				player = undefined;
 				bullets = undefined;
 				console.clear();
@@ -153,7 +200,7 @@ function update() {
 						++killed;
 						bullet.remove();
 						generateExplode(enemy, bullet);
-						enemy.remove();
+						enemy.reload(player);
 					}
 				});
 			}
@@ -179,7 +226,9 @@ function update() {
 
 function loop() {
 	update();
-	draw();
+	drawLayer0();
+	drawLayer1();
+	drawLayer2();
 	requestAnimationFrame(loop);
 };
 

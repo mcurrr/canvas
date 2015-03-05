@@ -14,9 +14,9 @@ function Explode (options) {
 	this.centerY = this.y + this.radius;
 	// this.color = options.color || "#000"; //particle version
 	this.color = randomColor(100, 255, 0, 0, 0, 0, 0.8); //bloody version
-	this.speed = randomInt(5, 10);
+	this.speed = randomInt(7, 10);
 	this.scale = 1;
-	this.scaleSpeed = randomInt(1, 4);
+	this.scaleSpeed = randomInt(2, 4);
 
 	this.velocity = {
 		x: this.speed * Math.cos(this.angle * Math.PI / 180),
@@ -24,7 +24,7 @@ function Explode (options) {
 	};
 
 	this.update = function (dt) {
-		this.radius -= this.scaleSpeed / 5;
+		this.radius -= this.scaleSpeed / 2;
 		if (this.radius <= 0) {
 			this.radius = 0;
 			this.remove();
@@ -34,10 +34,6 @@ function Explode (options) {
 
 	this.draw = function (context) {
 		context.save();
-		context.shadowColor = '#666';
-		context.shadowBlur = 10;
-		context.shadowOffsetX = 10;
-		context.shadowOffsetY = 10;
 		context.scale(self.scale, self.scale);
 		context.beginPath();
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);

@@ -3,14 +3,14 @@ module.exports = Player;
 function Player (options) {
 	var self = this;
 
-	this.width = 20;
-	this.height = 20;
+	this.width = 30;
+	this.height = 30;
 	this.radius = this.width/1.6;
-	this.x = canvas.width/4;
-	this.y = canvas.height/2;
+	this.x = canvas2.width/2;
+	this.y = canvas2.height/2;
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = "#fff";
+	this.color = "#000";
 	this.speed = 3;
 	this.friction = 0.95;
 	this.ang = 0;
@@ -21,6 +21,16 @@ function Player (options) {
 		else {
 			return this.ang = 0;
 		}
+	};
+
+	this.pre = {
+		x: 0,
+		y: 0
+	};
+
+	this.vec = {
+		x: 0,
+		y: 0
 	};
 
 	this.velocity = {
@@ -50,6 +60,8 @@ function Player (options) {
 };
 
 Player.prototype.move = function () {
+	this.pre.x = this.x;
+	this.pre.y = this.y;
 	this.x += this.velocity.x;
 	this.y += this.velocity.y;
 	this.velocity.x *= this.friction;
@@ -67,12 +79,12 @@ Player.prototype.boundaries = function () {
 		this.y = 0;
 	}
 
-	if (this.x >= canvas.width - this.width) {
-		this.x = canvas.width - this.width;
+	if (this.x >= canvas2.width - this.width) {
+		this.x = canvas2.width - this.width;
 	}
 
-	if (this.y >= canvas.height - this.height) {
-		this.y = canvas.height - this.height;
+	if (this.y >= canvas2.height - this.height) {
+		this.y = canvas2.height - this.height;
 	}
 };
 
@@ -98,4 +110,24 @@ Player.prototype.input = function () {
 		this.direction = "down";
 	}
 };
- 
+
+Player.prototype.getDegrees = function () {
+	var degrees = 0;
+	this.vec.x = this.x - this.pre.x;
+	this.vec.y = this.y - this.pre.y;
+	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+
+	if (this.vec.x > 0 && this.vec.y > 0) {
+		degrees = degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y > 0) {
+		degrees = 180 - degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y < 0) {
+		degrees = 180 + (degrees * -1);
+	}
+		if (this.vec.x > 0 && this.vec.y < 0) {
+		degrees = 360 - (degrees * -1);
+	}
+	return degrees;
+};

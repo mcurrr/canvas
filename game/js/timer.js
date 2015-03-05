@@ -3,7 +3,7 @@ module.exports = Timer;
 function Timer (options) {
 	var self = this;
 
-	this.color = "#fff";
+	this.color = "rgba(0, 0, 0, 0.7)";
 	this.start = new Date();
 
 	this.update = function () {
@@ -20,9 +20,13 @@ function Timer (options) {
 		return self.minutes + ' : ' + self.seconds + ' . ' + self.milliseconds;
 	};
 
-	this.draw = function (context) {
+	this.draw = function (context, canvas) {
 		context.fillStyle = self.color;
-		context.font = '20px sans-serif';
-		context.fillText (self.formateTime(), 10, 30);
+		context.font = '80px sans-serif';
+		context.shadowColor = '#000';
+		context.shadowBlur = 15;
+		context.shadowOffsetX = 20;
+		context.shadowOffsetY = 20;
+		context.fillText (self.formateTime(), canvas.width/2 - 150, canvas.height/2);
 	};
 };

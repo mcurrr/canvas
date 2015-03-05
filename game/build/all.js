@@ -5,11 +5,28 @@ var Enemy = require("./enemy");
 var Timer = require("./timer.js");
 var Explode = require("./explode.js");
 
-window.canvas = document.getElementById("game");
-var context = canvas.getContext("2d");
+window.canvas0 = document.getElementById("layer0");
+var context0 = canvas0.getContext("2d");
+canvas0.width = window.innerWidth;
+canvas0.height = window.innerHeight;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+var img = new Image();
+img.src = './img/background.png';
+img.onload = function () {
+	var pattern = context0.createPattern(img, 'repeat');
+	context0.fillStyle = pattern;
+	context0.fillRect(0, 0, canvas0.width, canvas0.height);
+};
+
+window.canvas1 = document.getElementById("layer1");
+var context1 = canvas1.getContext("2d");
+canvas1.width = window.innerWidth;
+canvas1.height = window.innerHeight;
+
+window.canvas2 = document.getElementById("layer2");
+var context2 = canvas2.getContext("2d");
+canvas2.width = window.innerWidth;
+canvas2.height = window.innerHeight;
 
 window.killed = 0;
 window.keys = {};
@@ -21,7 +38,6 @@ window.timer = new Timer();
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
-	// e.preventDefault();
 });
 
 window.addEventListener("keyup", function(e) {
@@ -42,7 +58,9 @@ window.addEventListener("click", function (e) {
 });
 
 function generateEnemy () {
-	enemies[enemies.length] = new Enemy ();
+	enemies[enemies.length] = new Enemy (/*{
+		targetPlayer: {x: player.x, y: player.y}
+	}*/);
 };
 
 function generateEnemies () {
@@ -59,7 +77,19 @@ function generateEnemies () {
 };
 
 function generateExplode (obj1, obj2) {
-	for (var i = 0, ang = obj2.getDegrees() - 90; i < 20; i++, ang += 9) {
+	if (obj2 instanceof Player) {
+		var ang = 0;
+	}
+	else {
+		var ang = obj2.getDegrees() - 45;
+	}
+	for (var i = 0; i < 20; i++) {
+		if (obj2 instanceof Player) {
+			ang += 18;
+		}
+		else {
+			ang += 4.5;
+		}
 		explodes[explodes.length] = new Explode ({
 			x: obj1.x,
 			y: obj1.y,
@@ -70,7 +100,15 @@ function generateExplode (obj1, obj2) {
 	};
 };
 
-generateEnemies();
+generateEnemies(player);
+
+window.getPlayerX = function (player) {
+	return player.x;
+};
+
+window.getPlayerY = function (player) {
+	return player.y;
+};
 
 function isColliding (a, b) {
 	var distX = a.centerX - b.centerX;
@@ -105,28 +143,39 @@ function enemiesCollide(value) {
 	};
 };
 
+function drawLayer0 () {
+	// context0.fillStyle = "rgba(216, 111, 51, 1)";
+	// context0.fillRect (0, 0, canvas0.width, canvas0.height);
 
-function draw () {
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	context.fillStyle = "#F7A688";
-	context.fillRect (0, 0, canvas.width, canvas.height);
+};
+
+function drawLayer1 () {
+	explodes.forEach(function (explode) {
+		if (explode !== undefined) {
+			explode.draw(context1);
+		}
+	});
+};
+
+function drawLayer2 () {
+	context2.clearRect(0, 0, canvas2.width, canvas2.height);
 	if (player !== undefined) {
-		player.draw(context);
+		player.draw(context2);
 		bullets.forEach(function (bullet) {
-			bullet.draw(context);
+			bullet.draw(context2);
 		});
 	}
 	enemies.forEach(function (enemy) {
 		if (enemy !== undefined) {
-			enemy.draw(context);
+			enemy.draw(context2);
 		}
 	});
 	explodes.forEach(function (explode) {
 		if (explode !== undefined) {
-			explode.draw(context);
+			explode.draw(context2);
 		}
 	});
-	timer.draw(context);
+	timer.draw(context2, canvas2);
 };
 
 function update() {
@@ -139,8 +188,6 @@ function update() {
 		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
 				generateExplode(enemy, player);
-				enemy.remove();
-				generateExplode(player, enemy);
 				player = undefined;
 				bullets = undefined;
 				console.clear();
@@ -154,7 +201,7 @@ function update() {
 						++killed;
 						bullet.remove();
 						generateExplode(enemy, bullet);
-						enemy.remove();
+						enemy.reload(player);
 					}
 				});
 			}
@@ -180,11 +227,14 @@ function update() {
 
 function loop() {
 	update();
-	draw();
+	drawLayer0();
+	drawLayer1();
+	drawLayer2();
 	requestAnimationFrame(loop);
 };
 
 loop();
+
 },{"./bullet":2,"./enemy":3,"./explode.js":4,"./player":5,"./timer.js":6}],2:[function(require,module,exports){
 module.exports = Bullet;
 var u = 0;
@@ -193,12 +243,12 @@ function Bullet (options) {
 	var self = this;
 
 	this.u = u++;
+	this.x = options.x || 0;
+	this.y = options.y || 0;
 	this.pre = {
 		x: 0,
 		y: 0
 	};
-	this.x = options.x || 0;
-	this.y = options.y || 0;
 	this.vec = {
 		x: 0,
 		y: 0
@@ -206,8 +256,8 @@ function Bullet (options) {
 	this.radius = options.radius || 3;
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = options.color || "#fff";
-	this.speed = options.speed || 10;
+	this.color = options.color || "#000";
+	this.speed = options.speed || 35;
 
 	this.target = {
 		x: options.target.x,
@@ -269,11 +319,11 @@ Bullet.prototype.boundaries = function () {
 		this.remove();
 	}
 
-	if (this.centerX + this.radius > canvas.width) {
+	if (this.centerX + this.radius > canvas2.width) {
 		this.remove();
 	}
 
-	if (this.centerY + this.radius > canvas.height) {
+	if (this.centerY + this.radius > canvas2.height) {
 		this.remove();
 	}
 };
@@ -329,16 +379,55 @@ function Enemy (options) {
 
 	this.u = u++;
 	this.radius = 25;
-	this.x = randomInt(canvas.width - this.radius * 10, canvas.width - this.radius*3);
-	this.y = randomInt(0, canvas.height - this.radius * 2);
+
+	// this.targetPlayer = {
+	// 	x: options.targetPlayer.x,
+	// 	y: options.targetPlayer.y
+	// };
+
+	this.side = randomInt(1, 4);
+
+	switch (this.side) {
+		case 1: 
+			this.x = canvas2.width;
+			this.y = randomInt(-this.radius * 2, canvas2.height);
+			break;
+		case 2: 
+			this.x = -this.radius * 2;
+			this.y = randomInt(-this.radius * 2, canvas2.height);
+			break;
+		case 3: 
+			this.y = canvas2.height;
+			this.x = randomInt(-this.radius * 2, canvas2.width);
+			break;
+		case 4: 
+			this.y = -this.radius * 2;
+			this.x = randomInt(-this.radius * 2, canvas2.width);
+			break;
+		default:
+			this.x = 0;
+			this.y = 0;
+	};
+
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = randomColor(0, 0, 0, 150, 0, 150, 0.8);
-	this.speed = 20;
+	this.color = randomColor(0, 0, 0, 150, 0, 150, 1);
+	// this.speed = randomInt(1 , 5)/10;
+	this.speed = 30;
 	this.friction = 0.9;
 
+	this.pre = {
+		x: 0,
+		y: 0
+	};
+
+	this.vec = {
+		x: 0,
+		y: 0
+	};
+
 	this.direction = {
-		x: randomInt(-10, -70),
+		x: randomInt(-50, 50),
 		y: randomInt(-50, 50)
 	};
 
@@ -346,6 +435,10 @@ function Enemy (options) {
 		x: 0,
 		y: 0
 	};
+
+	// this.dx = (this.targetPlayer.x - this.centerX);
+	// this.dy = (this.targetPlayer.y - this.centerY);
+	// this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
 
 	this.update = function (dt) {
 		self.move();
@@ -364,13 +457,24 @@ function Enemy (options) {
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
 		context.fill();
-		context.restore();
+		// context.restore();
 	};
 };
 
 Enemy.prototype.move = function () {
+	// this.targetPlayer.x = getPlayerX();
+	// this.targetPlayer.y = getPlayerY();
+	// this.dx = (this.targetPlayer.x - this.centerX);
+	// this.dy = (this.targetPlayer.y - this.centerY);
+	// this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+	// this.velocity.x = (this.dx / this.mag) * this.speed;
+	// this.velocity.y = (this.dy / this.mag) * this.speed;
+	this.pre.x = this.x;
+	this.pre.y = this.y;
 	this.x += 0.001 * this.speed * this.direction.x;
 	this.y += 0.001 * this.speed * this.direction.y;
+	// this.x += this.velocity.x;
+	// this.y += this.velocity.y;
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
 };
@@ -380,22 +484,20 @@ Enemy.prototype.grow = function () {
 };
 
 Enemy.prototype.boundaries = function () {
-	if (this.x <= 0 || this.centerX + this.radius >= canvas.width) {
+	if (this.x <= -this.radius * 2 || this.x >= canvas2.width) {
 		this.direction.x *= -1;
 	}
-	if (this.y <= 0 || this.centerY + this.radius >= canvas.height) {
+	if (this.y <= -this.radius * 2 || this.y >= canvas2.height) {
 		this.direction.y *= -1;
 	}
 };
 
-function randomInt (min, max) {
-	return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
-Enemy.prototype.reload = function () {
+Enemy.prototype.reload = function (player) {
 	var del = find(enemies, this);
 	if (del != -1) {
-		enemies.splice(del, 1, enemies[del] = new Enemy());
+		enemies.splice(del, 1, enemies[del] = new Enemy({
+			targetPlayer: {x: player.x, y: player.y}
+		}));
 	}
 	else {
 		console.log('error!');
@@ -410,6 +512,31 @@ Enemy.prototype.remove = function () {
 	else {
 		console.log('error!');
 	}
+};
+
+Enemy.prototype.getDegrees = function () {
+	var degrees = 0;
+	this.vec.x = this.x - this.pre.x;
+	this.vec.y = this.y - this.pre.y;
+	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+
+	if (this.vec.x > 0 && this.vec.y > 0) {
+		degrees = degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y > 0) {
+		degrees = 180 - degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y < 0) {
+		degrees = 180 + (degrees * -1);
+	}
+		if (this.vec.x > 0 && this.vec.y < 0) {
+		degrees = 360 - (degrees * -1);
+	}
+	return degrees;
+};
+
+function randomInt (min, max) {
+	return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
 function find(array, value) {
@@ -445,9 +572,9 @@ function Explode (options) {
 	this.centerY = this.y + this.radius;
 	// this.color = options.color || "#000"; //particle version
 	this.color = randomColor(100, 255, 0, 0, 0, 0, 0.8); //bloody version
-	this.speed = randomInt(5, 10);
+	this.speed = randomInt(7, 10);
 	this.scale = 1;
-	this.scaleSpeed = randomInt(1, 4);
+	this.scaleSpeed = randomInt(2, 4);
 
 	this.velocity = {
 		x: this.speed * Math.cos(this.angle * Math.PI / 180),
@@ -455,7 +582,7 @@ function Explode (options) {
 	};
 
 	this.update = function (dt) {
-		this.radius -= this.scaleSpeed / 5;
+		this.radius -= this.scaleSpeed / 2;
 		if (this.radius <= 0) {
 			this.radius = 0;
 			this.remove();
@@ -465,10 +592,6 @@ function Explode (options) {
 
 	this.draw = function (context) {
 		context.save();
-		context.shadowColor = '#666';
-		context.shadowBlur = 10;
-		context.shadowOffsetX = 10;
-		context.shadowOffsetY = 10;
 		context.scale(self.scale, self.scale);
 		context.beginPath();
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
@@ -519,14 +642,14 @@ module.exports = Player;
 function Player (options) {
 	var self = this;
 
-	this.width = 20;
-	this.height = 20;
+	this.width = 30;
+	this.height = 30;
 	this.radius = this.width/1.6;
-	this.x = canvas.width/4;
-	this.y = canvas.height/2;
+	this.x = canvas2.width/2;
+	this.y = canvas2.height/2;
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = "#fff";
+	this.color = "#000";
 	this.speed = 3;
 	this.friction = 0.95;
 	this.ang = 0;
@@ -537,6 +660,16 @@ function Player (options) {
 		else {
 			return this.ang = 0;
 		}
+	};
+
+	this.pre = {
+		x: 0,
+		y: 0
+	};
+
+	this.vec = {
+		x: 0,
+		y: 0
 	};
 
 	this.velocity = {
@@ -566,6 +699,8 @@ function Player (options) {
 };
 
 Player.prototype.move = function () {
+	this.pre.x = this.x;
+	this.pre.y = this.y;
 	this.x += this.velocity.x;
 	this.y += this.velocity.y;
 	this.velocity.x *= this.friction;
@@ -583,12 +718,12 @@ Player.prototype.boundaries = function () {
 		this.y = 0;
 	}
 
-	if (this.x >= canvas.width - this.width) {
-		this.x = canvas.width - this.width;
+	if (this.x >= canvas2.width - this.width) {
+		this.x = canvas2.width - this.width;
 	}
 
-	if (this.y >= canvas.height - this.height) {
-		this.y = canvas.height - this.height;
+	if (this.y >= canvas2.height - this.height) {
+		this.y = canvas2.height - this.height;
 	}
 };
 
@@ -614,14 +749,34 @@ Player.prototype.input = function () {
 		this.direction = "down";
 	}
 };
- 
+
+Player.prototype.getDegrees = function () {
+	var degrees = 0;
+	this.vec.x = this.x - this.pre.x;
+	this.vec.y = this.y - this.pre.y;
+	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+
+	if (this.vec.x > 0 && this.vec.y > 0) {
+		degrees = degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y > 0) {
+		degrees = 180 - degrees;
+	}
+		if (this.vec.x < 0 && this.vec.y < 0) {
+		degrees = 180 + (degrees * -1);
+	}
+		if (this.vec.x > 0 && this.vec.y < 0) {
+		degrees = 360 - (degrees * -1);
+	}
+	return degrees;
+};
 },{}],6:[function(require,module,exports){
 module.exports = Timer;
 
 function Timer (options) {
 	var self = this;
 
-	this.color = "#fff";
+	this.color = "rgba(0, 0, 0, 0.7)";
 	this.start = new Date();
 
 	this.update = function () {
@@ -638,10 +793,14 @@ function Timer (options) {
 		return self.minutes + ' : ' + self.seconds + ' . ' + self.milliseconds;
 	};
 
-	this.draw = function (context) {
+	this.draw = function (context, canvas) {
 		context.fillStyle = self.color;
-		context.font = '20px sans-serif';
-		context.fillText (self.formateTime(), 10, 30);
+		context.font = '80px sans-serif';
+		context.shadowColor = '#000';
+		context.shadowBlur = 15;
+		context.shadowOffsetX = 20;
+		context.shadowOffsetY = 20;
+		context.fillText (self.formateTime(), canvas.width/2 - 150, canvas.height/2);
 	};
 };
 },{}]},{},[1]);
