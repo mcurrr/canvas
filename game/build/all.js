@@ -46,7 +46,7 @@ function generateEnemy () {
 };
 
 function generateEnemies () {
-	for (var i = 0; enemies.length < 20; i++) {
+	for (var i = 0; enemies.length < 30; i++) {
 		generateEnemy();
 		for(var i=0; i<enemies.length; i++) {
 			if (enemies[i].u != enemies[enemies.length - 1].u) {
@@ -59,7 +59,7 @@ function generateEnemies () {
 };
 
 function generateExplode (obj1, obj2) {
-	for (var i = 0, ang = obj2.getDegrees() - 90; i < 10; i++, ang += 18) {
+	for (var i = 0, ang = obj2.getDegrees() - 90; i < 20; i++, ang += 9) {
 		explodes[explodes.length] = new Explode ({
 			x: obj1.x,
 			y: obj1.y,
@@ -313,7 +313,7 @@ Bullet.prototype.getDegrees = function () {
 		degrees = 180 - degrees;
 	}
 		if (this.vec.x < 0 && this.vec.y < 0) {
-		degrees = 270 - (degrees * -1);
+		degrees = 180 + (degrees * -1);
 	}
 		if (this.vec.x > 0 && this.vec.y < 0) {
 		degrees = 360 - (degrees * -1);
@@ -328,12 +328,12 @@ function Enemy (options) {
 	var self = this;
 
 	this.u = u++;
-	this.radius = 15;
+	this.radius = 25;
 	this.x = randomInt(canvas.width - this.radius * 10, canvas.width - this.radius*3);
 	this.y = randomInt(0, canvas.height - this.radius * 2);
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = randomColor(0, 255, 0, 150, 0, 150, 0.8);
+	this.color = randomColor(0, 0, 0, 150, 0, 150, 0.8);
 	this.speed = 20;
 	this.friction = 0.9;
 
@@ -443,7 +443,8 @@ function Explode (options) {
 	this.radius = randomInt(2, Math.floor(this.Oradius / 2));
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = options.color || "#000";
+	// this.color = options.color || "#000"; //particle version
+	this.color = randomColor(100, 255, 0, 0, 0, 0, 0.8); //bloody version
 	this.speed = randomInt(5, 10);
 	this.scale = 1;
 	this.scaleSpeed = randomInt(1, 4);
@@ -504,6 +505,13 @@ function find(array, value) {
 
 function randomInt (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
+	var r = randomInt(rmin, rmax);
+	var g = randomInt(gmin, gmax);
+	var b = randomInt(bmin, bmax);
+	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 };
 },{}],5:[function(require,module,exports){
 module.exports = Player;

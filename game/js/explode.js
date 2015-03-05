@@ -12,7 +12,8 @@ function Explode (options) {
 	this.radius = randomInt(2, Math.floor(this.Oradius / 2));
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = options.color || "#000";
+	// this.color = options.color || "#000"; //particle version
+	this.color = randomColor(100, 255, 0, 0, 0, 0, 0.8); //bloody version
 	this.speed = randomInt(5, 10);
 	this.scale = 1;
 	this.scaleSpeed = randomInt(1, 4);
@@ -73,4 +74,11 @@ function find(array, value) {
 
 function randomInt (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
+	var r = randomInt(rmin, rmax);
+	var g = randomInt(gmin, gmax);
+	var b = randomInt(bmin, bmax);
+	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 };

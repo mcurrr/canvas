@@ -45,7 +45,7 @@ function generateEnemy () {
 };
 
 function generateEnemies () {
-	for (var i = 0; enemies.length < 20; i++) {
+	for (var i = 0; enemies.length < 30; i++) {
 		generateEnemy();
 		for(var i=0; i<enemies.length; i++) {
 			if (enemies[i].u != enemies[enemies.length - 1].u) {
@@ -58,7 +58,7 @@ function generateEnemies () {
 };
 
 function generateExplode (obj1, obj2) {
-	for (var i = 0, ang = obj2.getDegrees() - 90; i < 10; i++, ang += 18) {
+	for (var i = 0, ang = obj2.getDegrees() - 90; i < 20; i++, ang += 9) {
 		explodes[explodes.length] = new Explode ({
 			x: obj1.x,
 			y: obj1.y,

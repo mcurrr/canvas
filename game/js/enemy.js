@@ -5,12 +5,12 @@ function Enemy (options) {
 	var self = this;
 
 	this.u = u++;
-	this.radius = 15;
+	this.radius = 25;
 	this.x = randomInt(canvas.width - this.radius * 10, canvas.width - this.radius*3);
 	this.y = randomInt(0, canvas.height - this.radius * 2);
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
-	this.color = randomColor(0, 255, 0, 150, 0, 150, 0.8);
+	this.color = randomColor(0, 0, 0, 150, 0, 150, 0.8);
 	this.speed = 20;
 	this.friction = 0.9;
 

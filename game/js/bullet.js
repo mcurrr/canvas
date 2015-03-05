@@ -125,7 +125,7 @@ Bullet.prototype.getDegrees = function () {
 		degrees = 180 - degrees;
 	}
 		if (this.vec.x < 0 && this.vec.y < 0) {
-		degrees = 270 - (degrees * -1);
+		degrees = 180 + (degrees * -1);
 	}
 		if (this.vec.x > 0 && this.vec.y < 0) {
 		degrees = 360 - (degrees * -1);
