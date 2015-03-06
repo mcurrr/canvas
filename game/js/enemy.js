@@ -7,10 +7,10 @@ function Enemy (options) {
 	this.u = u++;
 	this.radius = 25;
 
-	// this.targetPlayer = {
-	// 	x: options.targetPlayer.x,
-	// 	y: options.targetPlayer.y
-	// };
+	this.targetPlayer = {
+		x: options.targetPlayer.x,
+		y: options.targetPlayer.y
+	};
 
 	this.side = randomInt(1, 4);
 
@@ -39,8 +39,8 @@ function Enemy (options) {
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
 	this.color = randomColor(0, 0, 0, 150, 0, 150, 1);
-	// this.speed = randomInt(1 , 5)/10;
-	this.speed = 30;
+	this.speed = randomInt(1 , 5)/10;
+	// this.speed = 30;
 	this.friction = 0.9;
 
 	this.pre = {
@@ -63,12 +63,17 @@ function Enemy (options) {
 		y: 0
 	};
 
-	// this.dx = (this.targetPlayer.x - this.centerX);
-	// this.dy = (this.targetPlayer.y - this.centerY);
-	// this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+	this.dx = (this.targetPlayer.x - this.centerX);
+	this.dy = (this.targetPlayer.y - this.centerY);
+	this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
 
 	this.update = function (dt) {
-		self.move();
+		if(playerIsMoving) {
+			self.moveToPlayer();
+		}
+		else {
+			self.moveRandom();
+		}
 		// self.grow();
 		self.boundaries();
 		self.speed += 0.005;
@@ -88,23 +93,31 @@ function Enemy (options) {
 	};
 };
 
-Enemy.prototype.move = function () {
-	// this.targetPlayer.x = getPlayerX();
-	// this.targetPlayer.y = getPlayerY();
-	// this.dx = (this.targetPlayer.x - this.centerX);
-	// this.dy = (this.targetPlayer.y - this.centerY);
-	// this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
-	// this.velocity.x = (this.dx / this.mag) * this.speed;
-	// this.velocity.y = (this.dy / this.mag) * this.speed;
+Enemy.prototype.moveToPlayer = function () {
+	this.targetPlayer.x = getPlayerX();
+	this.targetPlayer.y = getPlayerY();
+	this.dx = (this.targetPlayer.x - this.centerX);
+	this.dy = (this.targetPlayer.y - this.centerY);
+	this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+	this.velocity.x = (this.dx / this.mag) * this.speed;
+	this.velocity.y = (this.dy / this.mag) * this.speed;
+	this.pre.x = this.x;
+	this.pre.y = this.y;
+	this.x += this.velocity.x;
+	this.y += this.velocity.y;
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
+};
+
+Enemy.prototype.moveRandom = function () {
 	this.pre.x = this.x;
 	this.pre.y = this.y;
 	this.x += 0.001 * this.speed * this.direction.x;
 	this.y += 0.001 * this.speed * this.direction.y;
-	// this.x += this.velocity.x;
-	// this.y += this.velocity.y;
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
 };
+
 
 Enemy.prototype.grow = function () {
 	this.radius += 0.01;

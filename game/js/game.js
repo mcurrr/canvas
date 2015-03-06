@@ -34,19 +34,22 @@ window.enemies = [];
 window.explodes = [];
 window.player = new Player ();
 window.timer = new Timer();
+window.playerIsMoving = false;
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
+	playerIsMoving = true;
 });
 
 window.addEventListener("keyup", function(e) {
 	delete keys[e.keyCode];
+	playerIsMoving = false;
 });
 
 window.statistic = 'Accuracy: 0%';
 console.log(statistic);
 
-window.addEventListener("mousemove", function (e) {
+window.addEventListener("mousedown", function (e) {
 	if (player !== undefined) {
 		bullets[bullets.length] = new Bullet({
 			x: player.x + player.width / 2,
@@ -206,7 +209,9 @@ function update() {
 			}
 		}
 		if (enemy !== undefined) {
-			enemiesCollide (enemy);
+			if (!playerIsMoving) {
+				enemiesCollide (enemy);
+			}
 			enemy.update();
 		}
 	});
