@@ -1,7 +1,5 @@
 var gulp = require ('gulp'),
 	uglify = require('gulp-uglify'),
-	rename = require('gulp-rename'),
-	plumber = require('gulp-plumber'),
 	livereload = require('gulp-livereload'),
 	source = require('vinyl-source-stream'),
 	browserify = require('browserify');
