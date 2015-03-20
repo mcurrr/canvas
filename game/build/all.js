@@ -1,12 +1,33 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Player = require("./player");
-var Bullet = require("./bullet");
-var Enemy = require("./enemy");
-var Timer = require("./timer.js");
-var Explode = require("./explode.js");
+	Bullet = require("./bullet"),
+	Enemy = require("./enemy"),
+	Player = require("./player"),
+	Timer = require("./timer"),
+	Explode = require("./explode"),
+	Sound = require("./sounds");
 
-window.canvas0 = document.getElementById("layer0");
-var context0 = canvas0.getContext("2d");
+function getShotSound () {
+	for (var i = 0; i < poolShot.length; i++) {
+		if (poolShot[i].currentTime == 0 || poolShot[i].ended) {
+			poolShot[i].play();
+			return true;
+		}
+	}
+};
+
+function getExplosionSound () {
+	for (var i = 0; i < poolSplash.length; i++) {
+		if (poolSplash[i].currentTime == 0 || poolSplash[i].ended) {
+			poolSplash[i].play();
+			return true;
+		}
+	}
+};
+
+window.loading = document.getElementById("loading");
+
+canvas0 = document.getElementById("layer0");
+context0 = canvas0.getContext("2d");
 canvas0.width = window.innerWidth;
 canvas0.height = window.innerHeight;
 
@@ -35,6 +56,16 @@ window.enemies = [];
 window.explodes = [];
 window.player = new Player ();
 window.timer = new Timer();
+window.poolShot = [];
+window.poolSplash = [];
+window.bulletSound = new Sound(20);
+bulletSound.init("bulletSound");
+window.explosionSound = new Sound(20);
+explosionSound.init("explosionSound");
+window.backgroundSound = new Audio('./audio/smooth_criminal.mp3');
+backgroundSound.loop = true;
+backgroundSound.volume = .025;
+backgroundSound.load();
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
@@ -54,6 +85,7 @@ window.addEventListener("mousedown", function (e) {
 			y: player.y + player.height / 2,
 			target: {x: e.clientX, y: e.clientY}
 		});
+	getShotSound();
 	}
 });
 
@@ -62,7 +94,7 @@ function generateEnemy () {
 };
 
 function generateEnemies () {
-	for (var i = 0; enemies.length < 10; i++) {
+	for (var i = 0; enemies.length < 25; i++) {
 		generateEnemy();
 		for(var i=0; i<enemies.length; i++) {
 			if (enemies[i].u != enemies[enemies.length - 1].u) {
@@ -98,15 +130,7 @@ function generateExplode (obj1, obj2) {
 	};
 };
 
-generateEnemies(player);
-
-window.getPlayerX = function (player) {
-	return player.x;
-};
-
-window.getPlayerY = function (player) {
-	return player.y;
-};
+generateEnemies();
 
 function isColliding (a, b) {
 	var distX = a.centerX - b.centerX;
@@ -180,6 +204,7 @@ function update() {
 		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
 				generateExplode(player, enemy);
+				getExplosionSound();
 				player = undefined;
 				bullets = undefined;
 				console.clear();
@@ -191,9 +216,10 @@ function update() {
 				bullets.forEach(function (bullet) {
 					if (isColliding (bullet, enemy)) {
 						++killed;
+						getExplosionSound();
 						bullet.remove();
 						generateExplode(enemy, bullet);
-						enemy.reload(player);
+						enemy.reload();
 					}
 				});
 			}
@@ -217,6 +243,15 @@ function update() {
 	}
 };
 
+function checkReadyState () {
+	if (backgroundSound.readyState === 4) {
+		window.clearInterval(checkAudio);
+		loading.style.display = "none";
+		backgroundSound.play();
+		loop();
+	}
+};
+
 function loop() {
 	update();
 	drawLayer1();
@@ -224,9 +259,10 @@ function loop() {
 	requestAnimationFrame(loop);
 };
 
-loop();
-
-},{"./bullet":2,"./enemy":3,"./explode.js":4,"./player":5,"./timer.js":6}],2:[function(require,module,exports){
+window.checkAudio = window.setInterval(function() {
+	checkReadyState()
+}, 1000);
+},{"./bullet":2,"./enemy":3,"./explode":4,"./player":5,"./sounds":6,"./timer":7}],2:[function(require,module,exports){
 module.exports = Bullet;
 var u = 0;
 
@@ -294,33 +330,32 @@ function Bullet (options) {
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
 		context.fill();
-		context.lineWidth = 1;
-		context.strokeStyle = '#fff';
-		context.stroke();
+		// context.lineWidth = 1;
+		// context.strokeStyle = '#fff';
+		// context.stroke();
 		context.restore();
 	};
 };
 
 Bullet.prototype.boundaries = function () {
-	if (this.centerX < 0) {
+	if (this.centerX - this.radius < 0) {
 		this.remove();
 	}
 
-	if (this.centerY < 0) {
+	if (this.centerY - this.radius < 0) {
 		this.remove();
 	}
 
-	if (this.centerX > canvas2.width) {
+	if (this.centerX + this.radius > canvas2.width) {
 		this.remove();
 	}
 
-	if (this.centerY > canvas2.height) {
+	if (this.centerY + this.radius > canvas2.height) {
 		this.remove();
 	}
 };
 
 Bullet.prototype.remove = function () {
-	// statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
 	var del = find(bullets, this);
 	if (del != -1) {
 		bullets.splice(del, 1);
@@ -362,12 +397,23 @@ Bullet.prototype.getDegrees = function () {
 },{}],3:[function(require,module,exports){
 module.exports = Enemy;
 var u = 0;
+var speedLimit = 1;
+var imgLoaded = false;
+
+var img = new Image();
+img.onload = function(){
+	imgLoaded = true;
+};
+img.src = './img/brainI.png';
 
 function Enemy (options) {
+	this.step = 0;
+	this.changeDirection = randomInt(1 ,7) * 70;
 	var self = this;
 
 	this.u = u++;
-	this.radius = 25;
+	speedLimit += 0.05;
+	this.radius = randomInt(20, 30);
 
 	this.side = randomInt(1, 4);
 
@@ -396,7 +442,7 @@ function Enemy (options) {
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
 	this.color = randomColor(0, 0, 0, 150, 0, 150, 1);
-	this.speed = randomInt(20 , 30)/10;
+	this.speed = randomInt(30, 40);
 	this.friction = 0.9;
 
 	this.pre = {
@@ -410,8 +456,8 @@ function Enemy (options) {
 	};
 
 	this.direction = {
-		x: randomInt(-50, 50),
-		y: randomInt(-50, 50)
+		x: randomInt(40, 70),
+		y: randomInt(50, 80)
 	};
 
 	this.velocity = {
@@ -421,26 +467,39 @@ function Enemy (options) {
 
 	this.update = function (dt) {
 		self.moveRandom();
-		// self.grow();
 		self.boundaries();
-		self.speed += 0.005;
 	};
 
 	this.draw = function (context) {
 		context.save();
-		context.shadowColor = '#666';
-		context.shadowBlur = 10;
-		context.shadowOffsetX = 10;
-		context.shadowOffsetY = 10;
-		context.beginPath();
-		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
-		context.fillStyle = self.color;
-		context.fill();
-		// context.restore();
+		context.shadowColor = 'rgba(0,0,0,.3)';
+		context.shadowBlur = 0;
+		context.shadowOffsetX = 0;
+		context.shadowOffsetY = 0;
+		context.translate(self.centerX, self.centerY);
+		context.rotate(Math.PI/180 * (self.getDegrees() - 90));
+		if (imgLoaded) {
+			context.drawImage(img, -self.radius, -self.radius, self.radius * 2, self.radius * 2);
+		}
+		else {
+			context.beginPath();
+			context.arc(0, 0, self.radius, 0, 2 * Math.PI, false);
+			context.fillStyle = self.color;
+			context.fill();
+		}
+		context.restore();
 	};
 };
 
 Enemy.prototype.moveRandom = function () {
+	if (!(this.step % this.changeDirection)) {
+		this.direction = {
+			x: randomInt(-50, 50),
+			y: randomInt(-50, 50)
+		};
+		this.speed = randomInt(30, 40);
+	}
+	this.step++;
 	this.pre.x = this.x;
 	this.pre.y = this.y;
 	this.x += 0.001 * this.speed * this.direction.x;
@@ -466,9 +525,7 @@ Enemy.prototype.boundaries = function () {
 Enemy.prototype.reload = function (player) {
 	var del = find(enemies, this);
 	if (del != -1) {
-		enemies.splice(del, 1, enemies[del] = new Enemy({
-			targetPlayer: {x: player.x, y: player.y}
-		}));
+		enemies.splice(del, 1, enemies[del] = new Enemy());
 	}
 	else {
 		console.log('error!');
@@ -525,7 +582,6 @@ function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
 	var b = randomInt(bmin, bmax);
 	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 };
-
 },{}],4:[function(require,module,exports){
 module.exports = Explode;
 var u = 0;
@@ -610,6 +666,13 @@ function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
 },{}],5:[function(require,module,exports){
 module.exports = Player;
 
+var imgLoaded = false;
+var img = new Image();
+img.onload = function(){
+	imgLoaded = true;
+};
+img.src = './img/zombi.png';
+
 function Player (options) {
 	var self = this;
 
@@ -638,6 +701,9 @@ function Player (options) {
 		y: 0
 	};
 
+	this.dtX = 0;
+	this.dtY = 0;
+
 	this.vec = {
 		x: 0,
 		y: 0
@@ -648,7 +714,7 @@ function Player (options) {
 		y: 0.9
 	};
 
-	this.update = function (dt) {
+	this.update = function () {
 		self.input();
 		self.move();
 		self.boundaries();
@@ -658,13 +724,18 @@ function Player (options) {
 	this.draw = function (context) {
 		context.save();
 		context.shadowColor = '#888';
-		context.shadowBlur = 10;
-		context.shadowOffsetX = 10;
-		context.shadowOffsetY = 10;
-		context.translate(self.x + self.width/2, self.y + self.height/2);
+		context.shadowBlur = 0;
+		context.shadowOffsetX = 0;
+		context.shadowOffsetY = 0;
+		context.translate(self.centerX, self.centerY);
 		context.rotate(Math.PI/180 * self.ang);
-		context.fillStyle = self.color;
-		context.fillRect(-self.width/2, -self.height/2, self.width, self.height);
+		if (imgLoaded) {
+			context.drawImage(img, -self.radius * 1.5, -self.radius * 1.5, self.radius * 3, self.radius * 3);
+		}
+		else {
+			context.fillStyle = self.color;
+			context.fillRect(-self.radius, -self.radius, self.radius * 2, self.radius * 2);
+		}
 		context.restore();
 	};
 };
@@ -674,6 +745,8 @@ Player.prototype.move = function () {
 	this.pre.y = this.y;
 	this.x += this.velocity.x;
 	this.y += this.velocity.y;
+	this.dtX = this.x - this.pre.x;
+	this.dtY = this.y - this.pre.y;
 	this.velocity.x *= this.friction;
 	this.velocity.y *= this.friction;
 	this.centerX = this.x + this.radius;
@@ -742,6 +815,31 @@ Player.prototype.getDegrees = function () {
 	return degrees;
 };
 },{}],6:[function(require,module,exports){
+module.exports = Sound;
+
+function Sound (maxSize) {
+	var size = maxSize;
+
+	this.init = function (objStr) {
+		if (objStr == "bulletSound") {
+			for (var i= 0; i < size; i++) {
+				bulletSound = new Audio("./audio/shot.mp3");
+				bulletSound.volume = 0.02;
+				bulletSound.load();
+				poolShot[i] = bulletSound;
+			}
+		}
+		else if (objStr == "explosionSound") {
+			for (var i= 0; i < size; i++) {
+				explosionSound = new Audio("./audio/squish.mp3");
+				explosionSound.volume = 0.2;
+				explosionSound.load();
+				poolSplash[i] = explosionSound;
+			}
+		}
+	};
+};
+},{}],7:[function(require,module,exports){
 module.exports = Timer;
 
 function Timer (options) {

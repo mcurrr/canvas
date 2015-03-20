@@ -1,11 +1,32 @@
-var Player = require("./player");
-var Bullet = require("./bullet");
-var Enemy = require("./enemy");
-var Timer = require("./timer.js");
-var Explode = require("./explode.js");
+	Bullet = require("./bullet"),
+	Enemy = require("./enemy"),
+	Player = require("./player"),
+	Timer = require("./timer"),
+	Explode = require("./explode"),
+	Sound = require("./sounds");
 
-window.canvas0 = document.getElementById("layer0");
-var context0 = canvas0.getContext("2d");
+function getShotSound () {
+	for (var i = 0; i < poolShot.length; i++) {
+		if (poolShot[i].currentTime == 0 || poolShot[i].ended) {
+			poolShot[i].play();
+			return true;
+		}
+	}
+};
+
+function getExplosionSound () {
+	for (var i = 0; i < poolSplash.length; i++) {
+		if (poolSplash[i].currentTime == 0 || poolSplash[i].ended) {
+			poolSplash[i].play();
+			return true;
+		}
+	}
+};
+
+window.loading = document.getElementById("loading");
+
+canvas0 = document.getElementById("layer0");
+context0 = canvas0.getContext("2d");
 canvas0.width = window.innerWidth;
 canvas0.height = window.innerHeight;
 
@@ -34,6 +55,16 @@ window.enemies = [];
 window.explodes = [];
 window.player = new Player ();
 window.timer = new Timer();
+window.poolShot = [];
+window.poolSplash = [];
+window.bulletSound = new Sound(20);
+bulletSound.init("bulletSound");
+window.explosionSound = new Sound(20);
+explosionSound.init("explosionSound");
+window.backgroundSound = new Audio('./audio/smooth_criminal.mp3');
+backgroundSound.loop = true;
+backgroundSound.volume = .025;
+backgroundSound.load();
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
@@ -53,6 +84,7 @@ window.addEventListener("mousedown", function (e) {
 			y: player.y + player.height / 2,
 			target: {x: e.clientX, y: e.clientY}
 		});
+	getShotSound();
 	}
 });
 
@@ -61,7 +93,7 @@ function generateEnemy () {
 };
 
 function generateEnemies () {
-	for (var i = 0; enemies.length < 10; i++) {
+	for (var i = 0; enemies.length < 25; i++) {
 		generateEnemy();
 		for(var i=0; i<enemies.length; i++) {
 			if (enemies[i].u != enemies[enemies.length - 1].u) {
@@ -97,15 +129,7 @@ function generateExplode (obj1, obj2) {
 	};
 };
 
-generateEnemies(player);
-
-window.getPlayerX = function (player) {
-	return player.x;
-};
-
-window.getPlayerY = function (player) {
-	return player.y;
-};
+generateEnemies();
 
 function isColliding (a, b) {
 	var distX = a.centerX - b.centerX;
@@ -179,6 +203,7 @@ function update() {
 		if (player !== undefined && enemy !== undefined) {
 			if (isColliding (player, enemy)) {
 				generateExplode(player, enemy);
+				getExplosionSound();
 				player = undefined;
 				bullets = undefined;
 				console.clear();
@@ -190,9 +215,10 @@ function update() {
 				bullets.forEach(function (bullet) {
 					if (isColliding (bullet, enemy)) {
 						++killed;
+						getExplosionSound();
 						bullet.remove();
 						generateExplode(enemy, bullet);
-						enemy.reload(player);
+						enemy.reload();
 					}
 				});
 			}
@@ -216,6 +242,15 @@ function update() {
 	}
 };
 
+function checkReadyState () {
+	if (backgroundSound.readyState === 4) {
+		window.clearInterval(checkAudio);
+		loading.style.display = "none";
+		backgroundSound.play();
+		loop();
+	}
+};
+
 function loop() {
 	update();
 	drawLayer1();
@@ -223,4 +258,6 @@ function loop() {
 	requestAnimationFrame(loop);
 };
 
-loop();
+window.checkAudio = window.setInterval(function() {
+	checkReadyState()
+}, 1000);

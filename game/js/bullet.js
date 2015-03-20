@@ -65,33 +65,32 @@ function Bullet (options) {
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
 		context.fill();
-		context.lineWidth = 1;
-		context.strokeStyle = '#fff';
-		context.stroke();
+		// context.lineWidth = 1;
+		// context.strokeStyle = '#fff';
+		// context.stroke();
 		context.restore();
 	};
 };
 
 Bullet.prototype.boundaries = function () {
-	if (this.centerX < 0) {
+	if (this.centerX - this.radius < 0) {
 		this.remove();
 	}
 
-	if (this.centerY < 0) {
+	if (this.centerY - this.radius < 0) {
 		this.remove();
 	}
 
-	if (this.centerX > canvas2.width) {
+	if (this.centerX + this.radius > canvas2.width) {
 		this.remove();
 	}
 
-	if (this.centerY > canvas2.height) {
+	if (this.centerY + this.radius > canvas2.height) {
 		this.remove();
 	}
 };
 
 Bullet.prototype.remove = function () {
-	// statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
 	var del = find(bullets, this);
 	if (del != -1) {
 		bullets.splice(del, 1);

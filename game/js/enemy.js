@@ -1,11 +1,22 @@
 module.exports = Enemy;
 var u = 0;
+var speedLimit = 1;
+var imgLoaded = false;
+
+var img = new Image();
+img.onload = function(){
+	imgLoaded = true;
+};
+img.src = './img/brainI.png';
 
 function Enemy (options) {
+	this.step = 0;
+	this.changeDirection = randomInt(1 ,7) * 70;
 	var self = this;
 
 	this.u = u++;
-	this.radius = 25;
+	speedLimit += 0.05;
+	this.radius = randomInt(20, 30);
 
 	this.side = randomInt(1, 4);
 
@@ -34,7 +45,7 @@ function Enemy (options) {
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
 	this.color = randomColor(0, 0, 0, 150, 0, 150, 1);
-	this.speed = randomInt(20 , 30)/10;
+	this.speed = randomInt(30, 40);
 	this.friction = 0.9;
 
 	this.pre = {
@@ -48,8 +59,8 @@ function Enemy (options) {
 	};
 
 	this.direction = {
-		x: randomInt(-50, 50),
-		y: randomInt(-50, 50)
+		x: randomInt(40, 70),
+		y: randomInt(50, 80)
 	};
 
 	this.velocity = {
@@ -59,26 +70,39 @@ function Enemy (options) {
 
 	this.update = function (dt) {
 		self.moveRandom();
-		// self.grow();
 		self.boundaries();
-		self.speed += 0.005;
 	};
 
 	this.draw = function (context) {
 		context.save();
-		context.shadowColor = '#666';
-		context.shadowBlur = 10;
-		context.shadowOffsetX = 10;
-		context.shadowOffsetY = 10;
-		context.beginPath();
-		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
-		context.fillStyle = self.color;
-		context.fill();
-		// context.restore();
+		context.shadowColor = 'rgba(0,0,0,.3)';
+		context.shadowBlur = 0;
+		context.shadowOffsetX = 0;
+		context.shadowOffsetY = 0;
+		context.translate(self.centerX, self.centerY);
+		context.rotate(Math.PI/180 * (self.getDegrees() - 90));
+		if (imgLoaded) {
+			context.drawImage(img, -self.radius, -self.radius, self.radius * 2, self.radius * 2);
+		}
+		else {
+			context.beginPath();
+			context.arc(0, 0, self.radius, 0, 2 * Math.PI, false);
+			context.fillStyle = self.color;
+			context.fill();
+		}
+		context.restore();
 	};
 };
 
 Enemy.prototype.moveRandom = function () {
+	if (!(this.step % this.changeDirection)) {
+		this.direction = {
+			x: randomInt(-50, 50),
+			y: randomInt(-50, 50)
+		};
+		this.speed = randomInt(30, 40);
+	}
+	this.step++;
 	this.pre.x = this.x;
 	this.pre.y = this.y;
 	this.x += 0.001 * this.speed * this.direction.x;
@@ -104,9 +128,7 @@ Enemy.prototype.boundaries = function () {
 Enemy.prototype.reload = function (player) {
 	var del = find(enemies, this);
 	if (del != -1) {
-		enemies.splice(del, 1, enemies[del] = new Enemy({
-			targetPlayer: {x: player.x, y: player.y}
-		}));
+		enemies.splice(del, 1, enemies[del] = new Enemy());
 	}
 	else {
 		console.log('error!');

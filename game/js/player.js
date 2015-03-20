@@ -1,5 +1,12 @@
 module.exports = Player;
 
+var imgLoaded = false;
+var img = new Image();
+img.onload = function(){
+	imgLoaded = true;
+};
+img.src = './img/zombi.png';
+
 function Player (options) {
 	var self = this;
 
@@ -28,6 +35,9 @@ function Player (options) {
 		y: 0
 	};
 
+	this.dtX = 0;
+	this.dtY = 0;
+
 	this.vec = {
 		x: 0,
 		y: 0
@@ -38,7 +48,7 @@ function Player (options) {
 		y: 0.9
 	};
 
-	this.update = function (dt) {
+	this.update = function () {
 		self.input();
 		self.move();
 		self.boundaries();
@@ -48,13 +58,18 @@ function Player (options) {
 	this.draw = function (context) {
 		context.save();
 		context.shadowColor = '#888';
-		context.shadowBlur = 10;
-		context.shadowOffsetX = 10;
-		context.shadowOffsetY = 10;
-		context.translate(self.x + self.width/2, self.y + self.height/2);
+		context.shadowBlur = 0;
+		context.shadowOffsetX = 0;
+		context.shadowOffsetY = 0;
+		context.translate(self.centerX, self.centerY);
 		context.rotate(Math.PI/180 * self.ang);
-		context.fillStyle = self.color;
-		context.fillRect(-self.width/2, -self.height/2, self.width, self.height);
+		if (imgLoaded) {
+			context.drawImage(img, -self.radius * 1.5, -self.radius * 1.5, self.radius * 3, self.radius * 3);
+		}
+		else {
+			context.fillStyle = self.color;
+			context.fillRect(-self.radius, -self.radius, self.radius * 2, self.radius * 2);
+		}
 		context.restore();
 	};
 };
@@ -64,6 +79,8 @@ Player.prototype.move = function () {
 	this.pre.y = this.y;
 	this.x += this.velocity.x;
 	this.y += this.velocity.y;
+	this.dtX = this.x - this.pre.x;
+	this.dtY = this.y - this.pre.y;
 	this.velocity.x *= this.friction;
 	this.velocity.y *= this.friction;
 	this.centerX = this.x + this.radius;
