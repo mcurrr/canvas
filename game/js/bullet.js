@@ -73,27 +73,25 @@ function Bullet (options) {
 };
 
 Bullet.prototype.boundaries = function () {
-	if (this.centerX - this.radius < 0) {
+	if (this.centerX < 0) {
 		this.remove();
 	}
 
-	if (this.centerY - this.radius < 0) {
+	if (this.centerY < 0) {
 		this.remove();
 	}
 
-	if (this.centerX + this.radius > canvas2.width) {
+	if (this.centerX > canvas2.width) {
 		this.remove();
 	}
 
-	if (this.centerY + this.radius > canvas2.height) {
+	if (this.centerY > canvas2.height) {
 		this.remove();
 	}
 };
 
 Bullet.prototype.remove = function () {
-	// console.clear();
 	// statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
-	// console.log(statistic);
 	var del = find(bullets, this);
 	if (del != -1) {
 		bullets.splice(del, 1);

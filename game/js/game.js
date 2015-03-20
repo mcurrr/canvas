@@ -34,16 +34,13 @@ window.enemies = [];
 window.explodes = [];
 window.player = new Player ();
 window.timer = new Timer();
-window.playerIsMoving = false;
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
-	playerIsMoving = true;
 });
 
 window.addEventListener("keyup", function(e) {
 	delete keys[e.keyCode];
-	playerIsMoving = false;
 });
 
 window.statistic = 'Accuracy: 0%';
@@ -60,13 +57,11 @@ window.addEventListener("mousedown", function (e) {
 });
 
 function generateEnemy () {
-	enemies[enemies.length] = new Enemy (/*{
-		targetPlayer: {x: player.x, y: player.y}
-	}*/);
+	enemies[enemies.length] = new Enemy ();
 };
 
 function generateEnemies () {
-	for (var i = 0; enemies.length < 30; i++) {
+	for (var i = 0; enemies.length < 10; i++) {
 		generateEnemy();
 		for(var i=0; i<enemies.length; i++) {
 			if (enemies[i].u != enemies[enemies.length - 1].u) {
@@ -145,12 +140,6 @@ function enemiesCollide(value) {
 	};
 };
 
-function drawLayer0 () {
-	// context0.fillStyle = "rgba(216, 111, 51, 1)";
-	// context0.fillRect (0, 0, canvas0.width, canvas0.height);
-
-};
-
 function drawLayer1 () {
 	explodes.forEach(function (explode) {
 		if (explode !== undefined) {
@@ -209,9 +198,7 @@ function update() {
 			}
 		}
 		if (enemy !== undefined) {
-			if (!playerIsMoving) {
-				enemiesCollide (enemy);
-			}
+			enemiesCollide (enemy);
 			enemy.update();
 		}
 	});
@@ -231,7 +218,6 @@ function update() {
 
 function loop() {
 	update();
-	drawLayer0();
 	drawLayer1();
 	drawLayer2();
 	requestAnimationFrame(loop);

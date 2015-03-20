@@ -35,16 +35,13 @@ window.enemies = [];
 window.explodes = [];
 window.player = new Player ();
 window.timer = new Timer();
-window.playerIsMoving = false;
 
 window.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
-	playerIsMoving = true;
 });
 
 window.addEventListener("keyup", function(e) {
 	delete keys[e.keyCode];
-	playerIsMoving = false;
 });
 
 window.statistic = 'Accuracy: 0%';
@@ -61,13 +58,11 @@ window.addEventListener("mousedown", function (e) {
 });
 
 function generateEnemy () {
-	enemies[enemies.length] = new Enemy (/*{
-		targetPlayer: {x: player.x, y: player.y}
-	}*/);
+	enemies[enemies.length] = new Enemy ();
 };
 
 function generateEnemies () {
-	for (var i = 0; enemies.length < 30; i++) {
+	for (var i = 0; enemies.length < 10; i++) {
 		generateEnemy();
 		for(var i=0; i<enemies.length; i++) {
 			if (enemies[i].u != enemies[enemies.length - 1].u) {
@@ -146,12 +141,6 @@ function enemiesCollide(value) {
 	};
 };
 
-function drawLayer0 () {
-	// context0.fillStyle = "rgba(216, 111, 51, 1)";
-	// context0.fillRect (0, 0, canvas0.width, canvas0.height);
-
-};
-
 function drawLayer1 () {
 	explodes.forEach(function (explode) {
 		if (explode !== undefined) {
@@ -210,9 +199,7 @@ function update() {
 			}
 		}
 		if (enemy !== undefined) {
-			if (!playerIsMoving) {
-				enemiesCollide (enemy);
-			}
+			enemiesCollide (enemy);
 			enemy.update();
 		}
 	});
@@ -232,7 +219,6 @@ function update() {
 
 function loop() {
 	update();
-	drawLayer0();
 	drawLayer1();
 	drawLayer2();
 	requestAnimationFrame(loop);
@@ -316,27 +302,25 @@ function Bullet (options) {
 };
 
 Bullet.prototype.boundaries = function () {
-	if (this.centerX - this.radius < 0) {
+	if (this.centerX < 0) {
 		this.remove();
 	}
 
-	if (this.centerY - this.radius < 0) {
+	if (this.centerY < 0) {
 		this.remove();
 	}
 
-	if (this.centerX + this.radius > canvas2.width) {
+	if (this.centerX > canvas2.width) {
 		this.remove();
 	}
 
-	if (this.centerY + this.radius > canvas2.height) {
+	if (this.centerY > canvas2.height) {
 		this.remove();
 	}
 };
 
 Bullet.prototype.remove = function () {
-	// console.clear();
 	// statistic = 'Accuracy: ' + Math.floor(killed / (bullets[0].u + 1) * 100) + '%';
-	// console.log(statistic);
 	var del = find(bullets, this);
 	if (del != -1) {
 		bullets.splice(del, 1);
@@ -385,11 +369,6 @@ function Enemy (options) {
 	this.u = u++;
 	this.radius = 25;
 
-	this.targetPlayer = {
-		x: options.targetPlayer.x,
-		y: options.targetPlayer.y
-	};
-
 	this.side = randomInt(1, 4);
 
 	switch (this.side) {
@@ -417,8 +396,7 @@ function Enemy (options) {
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
 	this.color = randomColor(0, 0, 0, 150, 0, 150, 1);
-	this.speed = randomInt(1 , 5)/10;
-	// this.speed = 30;
+	this.speed = randomInt(20 , 30)/10;
 	this.friction = 0.9;
 
 	this.pre = {
@@ -441,17 +419,8 @@ function Enemy (options) {
 		y: 0
 	};
 
-	this.dx = (this.targetPlayer.x - this.centerX);
-	this.dy = (this.targetPlayer.y - this.centerY);
-	this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
-
 	this.update = function (dt) {
-		if(playerIsMoving) {
-			self.moveToPlayer();
-		}
-		else {
-			self.moveRandom();
-		}
+		self.moveRandom();
 		// self.grow();
 		self.boundaries();
 		self.speed += 0.005;
@@ -469,22 +438,6 @@ function Enemy (options) {
 		context.fill();
 		// context.restore();
 	};
-};
-
-Enemy.prototype.moveToPlayer = function () {
-	this.targetPlayer.x = getPlayerX();
-	this.targetPlayer.y = getPlayerY();
-	this.dx = (this.targetPlayer.x - this.centerX);
-	this.dy = (this.targetPlayer.y - this.centerY);
-	this.mag = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
-	this.velocity.x = (this.dx / this.mag) * this.speed;
-	this.velocity.y = (this.dy / this.mag) * this.speed;
-	this.pre.x = this.x;
-	this.pre.y = this.y;
-	this.x += this.velocity.x;
-	this.y += this.velocity.y;
-	this.centerX = this.x + this.radius;
-	this.centerY = this.y + this.radius;
 };
 
 Enemy.prototype.moveRandom = function () {
