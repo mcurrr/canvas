@@ -65,9 +65,6 @@ function Bullet (options) {
 		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
 		context.fillStyle = self.color;
 		context.fill();
-		// context.lineWidth = 1;
-		// context.strokeStyle = '#fff';
-		// context.stroke();
 		context.restore();
 	};
 };
@@ -75,18 +72,22 @@ function Bullet (options) {
 Bullet.prototype.boundaries = function () {
 	if (this.centerX - this.radius < 0) {
 		this.remove();
+		missed += 1;
 	}
 
 	if (this.centerY - this.radius < 0) {
 		this.remove();
+		missed += 1;
 	}
 
 	if (this.centerX + this.radius > canvas2.width) {
 		this.remove();
+		missed += 1;
 	}
 
 	if (this.centerY + this.radius > canvas2.height) {
 		this.remove();
+		missed += 1;
 	}
 };
 

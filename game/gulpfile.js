@@ -7,7 +7,7 @@ var gulp = require ('gulp'),
 gulp.task('scripts', function() {
 	return browserify('./js/game.js')
 			.bundle()
-			.pipe(source('all.js'))
+			.pipe(source('canvas.js'))
 			.pipe(gulp.dest('build/'))
 			.pipe(livereload());
 });
