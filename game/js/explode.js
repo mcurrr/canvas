@@ -1,4 +1,6 @@
 module.exports = Explode;
+Common = require("./parentClass.js");
+
 var u = 0;
 
 function Explode (options) {
@@ -9,14 +11,14 @@ function Explode (options) {
 	this.y = options.y || 0;
 	this.angle = options.angle || 0;
 	this.Oradius = options.Oradius || 10;
-	this.radius = randomInt(2, Math.floor(this.Oradius / 2));
+	this.radius = this.randomInt(2, Math.floor(this.Oradius / 2));
 	this.centerX = this.x + this.radius;
 	this.centerY = this.y + this.radius;
 	// this.color = options.color || "#000"; //particle version
-	this.color = randomColor(100, 255, 0, 0, 0, 0, 0.8); //bloody version
-	this.speed = randomInt(7, 10);
+	this.color = this.randomColor(100, 255, 0, 0, 0, 0, 0.8); //bloody version
+	this.speed = this.randomInt(7, 10);
 	this.scale = 1;
-	this.scaleSpeed = randomInt(2, 4);
+	this.scaleSpeed = this.randomInt(2, 4);
 
 	this.velocity = {
 		x: this.speed * Math.cos(this.angle * Math.PI / 180),
@@ -27,7 +29,7 @@ function Explode (options) {
 		this.radius -= this.scaleSpeed / 2;
 		if (this.radius <= 0) {
 			this.radius = 0;
-			this.remove();
+			this.remove(explodes);
 		}
 		self.move();
 	};
@@ -44,37 +46,9 @@ function Explode (options) {
 
 };
 
+Explode.prototype = Object.create(Common.prototype);
+
 Explode.prototype.move = function () {
 	this.centerX += this.velocity.x;
 	this.centerY += this.velocity.y;
-};
-
-Explode.prototype.remove = function () {
-	var del = find(explodes, this);
-	if (del != -1) {
-		explodes.splice(del, 1);
-	}
-	else {
-		console.log("imposibru!");
-	}
-};
-
-function find(array, value) {
-	for(var i=0; i<array.length; i++) {
-		if (value !== undefined && array[i] !== undefined) {
-			if (array[i].u == value.u) return i;
-			}
-		}
-	return -1;
-};
-
-function randomInt (min, max) {
-	return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
-function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
-	var r = randomInt(rmin, rmax);
-	var g = randomInt(gmin, gmax);
-	var b = randomInt(bmin, bmax);
-	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 };

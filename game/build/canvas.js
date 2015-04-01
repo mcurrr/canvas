@@ -269,9 +269,9 @@ $(document).ready(function() {
 							if (!isSoundOff) {
 								getExplosionSound();
 							}
-							bullet.remove();
+							bullet.remove(bullets);
 							generateExplode(enemy, bullet);
-							enemy.reload();
+							enemy.reload(enemies, Enemy);
 						}
 					});
 				}
@@ -353,6 +353,7 @@ $(document).ready(function() {
 				if (!isMusicOff) {
 					backgroundSound.play();
 				}
+				timer.unpause();
 				stopped = false;
 				loop();
 			}
@@ -460,8 +461,10 @@ $(document).ready(function() {
 		resizeEnd = setTimeout(hideGears, 200);
 	});
 });
-},{"./bullet":2,"./enemy":3,"./explode":4,"./player":5,"./sounds":6,"./timer":7}],2:[function(require,module,exports){
+},{"./bullet":2,"./enemy":3,"./explode":4,"./player":6,"./sounds":7,"./timer":8}],2:[function(require,module,exports){
 module.exports = Bullet;
+Common = require("./parentClass.js");
+
 var u = 0;
 
 function Bullet (options) {
@@ -532,69 +535,73 @@ function Bullet (options) {
 	};
 };
 
+Bullet.prototype = Object.create(Common.prototype);
+
 Bullet.prototype.boundaries = function () {
 	if (this.centerX - this.radius < 0) {
-		this.remove();
+		this.remove(bullets);
 		missed += 1;
 	}
 
 	if (this.centerY - this.radius < 0) {
-		this.remove();
+		this.remove(bullets);
 		missed += 1;
 	}
 
 	if (this.centerX + this.radius > canvas2.width) {
-		this.remove();
+		this.remove(bullets);
 		missed += 1;
 	}
 
 	if (this.centerY + this.radius > canvas2.height) {
-		this.remove();
+		this.remove(bullets);
 		missed += 1;
 	}
 };
 
-Bullet.prototype.remove = function () {
-	var del = find(bullets, this);
-	if (del != -1) {
-		bullets.splice(del, 1);
-	}
-	else {
-		console.log("imposibru!");
-	}
-};
+// Bullet.prototype.remove = function () {
+// 	var del = find(bullets, this);
+// 	if (del != -1) {
+// 		bullets.splice(del, 1);
+// 	}
+// 	else {
+// 		console.log("imposibru!");
+// 	}
+// };
 
-function find(array, value) {
-	for(var i=0; i<array.length; i++) {
-		if (value !== undefined && array[i] !== undefined) {
-			if (array[i].u == value.u) return i;
-			}
-		}
-	return -1;
-};
+// function find(array, value) {
+// 	for(var i=0; i<array.length; i++) {
+// 		if (value !== undefined && array[i] !== undefined) {
+// 			if (array[i].u == value.u) return i;
+// 			}
+// 		}
+// 	return -1;
+// };
 
-Bullet.prototype.getDegrees = function () {
-	var degrees = 0;
-	this.vec.x = this.x - this.pre.x;
-	this.vec.y = this.y - this.pre.y;
-	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+// Bullet.prototype.getDegrees = function () {
+// 	var degrees = 0;
+// 	this.vec.x = this.x - this.pre.x;
+// 	this.vec.y = this.y - this.pre.y;
+// 	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
 
-	if (this.vec.x > 0 && this.vec.y > 0) {
-		degrees = degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y > 0) {
-		degrees = 180 - degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y < 0) {
-		degrees = 180 + (degrees * -1);
-	}
-		if (this.vec.x > 0 && this.vec.y < 0) {
-		degrees = 360 - (degrees * -1);
-	}
-	return degrees;
-};
-},{}],3:[function(require,module,exports){
+// 	if (this.vec.x > 0 && this.vec.y > 0) {
+// 		degrees = degrees;
+// 	}
+// 		if (this.vec.x < 0 && this.vec.y > 0) {
+// 		degrees = 180 - degrees;
+// 	}
+// 		if (this.vec.x < 0 && this.vec.y < 0) {
+// 		degrees = 180 + (degrees * -1);
+// 	}
+// 		if (this.vec.x > 0 && this.vec.y < 0) {
+// 		degrees = 360 - (degrees * -1);
+// 	}
+// 	return degrees;
+// };
+},{"./parentClass.js":5}],3:[function(require,module,exports){
 module.exports = Enemy;
+Common = require("./parentClass.js");
+
 var u = 0;
 var speedLimit = 1;
 var imgLoaded = false;
@@ -690,6 +697,8 @@ function Enemy (options) {
 	};
 };
 
+Enemy.prototype = Object.create(Common.prototype);
+
 Enemy.prototype.moveRandom = function () {
 	if (!(this.step % this.changeDirection)) {
 		this.direction = {
@@ -708,10 +717,6 @@ Enemy.prototype.moveRandom = function () {
 };
 
 
-Enemy.prototype.grow = function () {
-	this.radius += 0.01;
-};
-
 Enemy.prototype.boundaries = function () {
 	if (this.x <= -this.radius * 2 || this.x >= canvas2.width) {
 		this.direction.x *= -1;
@@ -721,27 +726,132 @@ Enemy.prototype.boundaries = function () {
 	}
 };
 
-Enemy.prototype.reload = function (player) {
-	var del = find(enemies, this);
-	if (del != -1) {
-		enemies.splice(del, 1, enemies[del] = new Enemy());
-	}
-	else {
-		console.log('error!');
-	}
+// Enemy.prototype.grow = function () {
+// 	this.radius += 0.01;
+// };
+
+// Enemy.prototype.reload = function (player) {
+// 	var del = find(enemies, this);
+// 	if (del != -1) {
+// 		enemies.splice(del, 1, enemies[del] = new Enemy());
+// 	}
+// 	else {
+// 		console.log('error!');
+// 	}
+// };
+
+// Enemy.prototype.remove = function () {
+// 	var del = find(enemies, this);
+// 	if (del != -1) {
+// 		enemies[del] = undefined;
+// 	}
+// 	else {
+// 		console.log('error!');
+// 	}
+// };
+
+// Enemy.prototype.getDegrees = function () {
+// 	var degrees = 0;
+// 	this.vec.x = this.x - this.pre.x;
+// 	this.vec.y = this.y - this.pre.y;
+// 	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+
+// 	if (this.vec.x > 0 && this.vec.y > 0) {
+// 		degrees = degrees;
+// 	}
+// 		if (this.vec.x < 0 && this.vec.y > 0) {
+// 		degrees = 180 - degrees;
+// 	}
+// 		if (this.vec.x < 0 && this.vec.y < 0) {
+// 		degrees = 180 + (degrees * -1);
+// 	}
+// 		if (this.vec.x > 0 && this.vec.y < 0) {
+// 		degrees = 360 - (degrees * -1);
+// 	}
+// 	return degrees;
+// };
+
+function randomInt (min, max) {
+	return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-Enemy.prototype.remove = function () {
-	var del = find(enemies, this);
-	if (del != -1) {
-		enemies[del] = undefined;
-	}
-	else {
-		console.log('error!');
-	}
+function find(array, value) {
+	for(var i=0; i<array.length; i++) {
+		if (value !== undefined && array[i] !== undefined) {
+			if (array[i].u == value.u) return i;
+			}
+		}
+	return -1;
 };
 
-Enemy.prototype.getDegrees = function () {
+function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
+	var r = randomInt(rmin, rmax);
+	var g = randomInt(gmin, gmax);
+	var b = randomInt(bmin, bmax);
+	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+};
+},{"./parentClass.js":5}],4:[function(require,module,exports){
+module.exports = Explode;
+Common = require("./parentClass.js");
+
+var u = 0;
+
+function Explode (options) {
+	var self = this;
+
+	this.u = u++;
+	this.x = options.x || 0;
+	this.y = options.y || 0;
+	this.angle = options.angle || 0;
+	this.Oradius = options.Oradius || 10;
+	this.radius = this.randomInt(2, Math.floor(this.Oradius / 2));
+	this.centerX = this.x + this.radius;
+	this.centerY = this.y + this.radius;
+	// this.color = options.color || "#000"; //particle version
+	this.color = this.randomColor(100, 255, 0, 0, 0, 0, 0.8); //bloody version
+	this.speed = this.randomInt(7, 10);
+	this.scale = 1;
+	this.scaleSpeed = this.randomInt(2, 4);
+
+	this.velocity = {
+		x: this.speed * Math.cos(this.angle * Math.PI / 180),
+		y: this.speed * Math.sin(this.angle * Math.PI / 180)
+	};
+
+	this.update = function (dt) {
+		this.radius -= this.scaleSpeed / 2;
+		if (this.radius <= 0) {
+			this.radius = 0;
+			this.remove(explodes);
+		}
+		self.move();
+	};
+
+	this.draw = function (context) {
+		context.save();
+		context.scale(self.scale, self.scale);
+		context.beginPath();
+		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
+		context.fillStyle = self.color;
+		context.fill();
+		context.restore();
+	};
+
+};
+
+Explode.prototype = Object.create(Common.prototype);
+
+Explode.prototype.move = function () {
+	this.centerX += this.velocity.x;
+	this.centerY += this.velocity.y;
+};
+
+},{"./parentClass.js":5}],5:[function(require,module,exports){
+module.exports = Common;
+
+function Common() {};
+
+Common.prototype.getDegrees = function () {
 	var degrees = 0;
 	this.vec.x = this.x - this.pre.x;
 	this.vec.y = this.y - this.pre.y;
@@ -762,88 +872,35 @@ Enemy.prototype.getDegrees = function () {
 	return degrees;
 };
 
-function randomInt (min, max) {
-	return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
-function find(array, value) {
-	for(var i=0; i<array.length; i++) {
-		if (value !== undefined && array[i] !== undefined) {
-			if (array[i].u == value.u) return i;
-			}
-		}
-	return -1;
-};
-
-function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
-	var r = randomInt(rmin, rmax);
-	var g = randomInt(gmin, gmax);
-	var b = randomInt(bmin, bmax);
-	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
-};
-},{}],4:[function(require,module,exports){
-module.exports = Explode;
-var u = 0;
-
-function Explode (options) {
-	var self = this;
-
-	this.u = u++;
-	this.x = options.x || 0;
-	this.y = options.y || 0;
-	this.angle = options.angle || 0;
-	this.Oradius = options.Oradius || 10;
-	this.radius = randomInt(2, Math.floor(this.Oradius / 2));
-	this.centerX = this.x + this.radius;
-	this.centerY = this.y + this.radius;
-	// this.color = options.color || "#000"; //particle version
-	this.color = randomColor(100, 255, 0, 0, 0, 0, 0.8); //bloody version
-	this.speed = randomInt(7, 10);
-	this.scale = 1;
-	this.scaleSpeed = randomInt(2, 4);
-
-	this.velocity = {
-		x: this.speed * Math.cos(this.angle * Math.PI / 180),
-		y: this.speed * Math.sin(this.angle * Math.PI / 180)
-	};
-
-	this.update = function (dt) {
-		this.radius -= this.scaleSpeed / 2;
-		if (this.radius <= 0) {
-			this.radius = 0;
-			this.remove();
-		}
-		self.move();
-	};
-
-	this.draw = function (context) {
-		context.save();
-		context.scale(self.scale, self.scale);
-		context.beginPath();
-		context.arc(self.centerX, self.centerY, self.radius, 0, 2 * Math.PI, false);
-		context.fillStyle = self.color;
-		context.fill();
-		context.restore();
-	};
-
-};
-
-Explode.prototype.move = function () {
-	this.centerX += this.velocity.x;
-	this.centerY += this.velocity.y;
-};
-
-Explode.prototype.remove = function () {
-	var del = find(explodes, this);
+Common.prototype.remove = function (arr) {
+	var del = this.find(arr, this);
 	if (del != -1) {
-		explodes.splice(del, 1);
+		arr.splice(del, 1);
 	}
 	else {
 		console.log("imposibru!");
 	}
 };
 
-function find(array, value) {
+Common.prototype.reload = function (arr, constr) {
+	var del = this.find(arr, this);
+	if (del != -1) {
+		arr.splice(del, 1, arr[del] = new constr());
+	}
+	else {
+		console.log('error!');
+	}
+};
+
+Common.prototype.grow = function () {
+	this.radius += 0.01;
+};
+
+Common.prototype.randomInt = function (min, max) {
+	return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+Common.prototype.find = function (array, value) {
 	for(var i=0; i<array.length; i++) {
 		if (value !== undefined && array[i] !== undefined) {
 			if (array[i].u == value.u) return i;
@@ -852,18 +909,15 @@ function find(array, value) {
 	return -1;
 };
 
-function randomInt (min, max) {
-	return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
-function randomColor (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
-	var r = randomInt(rmin, rmax);
-	var g = randomInt(gmin, gmax);
-	var b = randomInt(bmin, bmax);
+Common.prototype.randomColor = function (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
+	var r = this.randomInt(rmin, rmax);
+	var g = this.randomInt(gmin, gmax);
+	var b = this.randomInt(bmin, bmax);
 	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 };
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = Player;
+Common = require("./parentClass.js");
 
 var imgLoaded = false;
 var img = new Image();
@@ -939,6 +993,8 @@ function Player (options) {
 	};
 };
 
+Player.prototype = Object.create(Common.prototype);
+
 Player.prototype.move = function () {
 	this.pre.x = this.x;
 	this.pre.y = this.y;
@@ -993,27 +1049,7 @@ Player.prototype.input = function () {
 	}
 };
 
-Player.prototype.getDegrees = function () {
-	var degrees = 0;
-	this.vec.x = this.x - this.pre.x;
-	this.vec.y = this.y - this.pre.y;
-	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
-
-	if (this.vec.x > 0 && this.vec.y > 0) {
-		degrees = degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y > 0) {
-		degrees = 180 - degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y < 0) {
-		degrees = 180 + (degrees * -1);
-	}
-		if (this.vec.x > 0 && this.vec.y < 0) {
-		degrees = 360 - (degrees * -1);
-	}
-	return degrees;
-};
-},{}],6:[function(require,module,exports){
+},{"./parentClass.js":5}],7:[function(require,module,exports){
 module.exports = Sound;
 
 function Sound (maxSize) {
@@ -1038,7 +1074,7 @@ function Sound (maxSize) {
 		}
 	};
 };
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = Timer;
 
 function Timer (options) {

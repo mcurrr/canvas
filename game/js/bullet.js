@@ -1,4 +1,6 @@
 module.exports = Bullet;
+Common = require("./parentClass.js");
+
 var u = 0;
 
 function Bullet (options) {
@@ -69,64 +71,66 @@ function Bullet (options) {
 	};
 };
 
+Bullet.prototype = Object.create(Common.prototype);
+
 Bullet.prototype.boundaries = function () {
 	if (this.centerX - this.radius < 0) {
-		this.remove();
+		this.remove(bullets);
 		missed += 1;
 	}
 
 	if (this.centerY - this.radius < 0) {
-		this.remove();
+		this.remove(bullets);
 		missed += 1;
 	}
 
 	if (this.centerX + this.radius > canvas2.width) {
-		this.remove();
+		this.remove(bullets);
 		missed += 1;
 	}
 
 	if (this.centerY + this.radius > canvas2.height) {
-		this.remove();
+		this.remove(bullets);
 		missed += 1;
 	}
 };
 
-Bullet.prototype.remove = function () {
-	var del = find(bullets, this);
-	if (del != -1) {
-		bullets.splice(del, 1);
-	}
-	else {
-		console.log("imposibru!");
-	}
-};
+// Bullet.prototype.remove = function () {
+// 	var del = find(bullets, this);
+// 	if (del != -1) {
+// 		bullets.splice(del, 1);
+// 	}
+// 	else {
+// 		console.log("imposibru!");
+// 	}
+// };
 
-function find(array, value) {
-	for(var i=0; i<array.length; i++) {
-		if (value !== undefined && array[i] !== undefined) {
-			if (array[i].u == value.u) return i;
-			}
-		}
-	return -1;
-};
+// function find(array, value) {
+// 	for(var i=0; i<array.length; i++) {
+// 		if (value !== undefined && array[i] !== undefined) {
+// 			if (array[i].u == value.u) return i;
+// 			}
+// 		}
+// 	return -1;
+// };
 
-Bullet.prototype.getDegrees = function () {
-	var degrees = 0;
-	this.vec.x = this.x - this.pre.x;
-	this.vec.y = this.y - this.pre.y;
-	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+// Bullet.prototype.getDegrees = function () {
+// 	var degrees = 0;
+// 	this.vec.x = this.x - this.pre.x;
+// 	this.vec.y = this.y - this.pre.y;
+// 	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
 
-	if (this.vec.x > 0 && this.vec.y > 0) {
-		degrees = degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y > 0) {
-		degrees = 180 - degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y < 0) {
-		degrees = 180 + (degrees * -1);
-	}
-		if (this.vec.x > 0 && this.vec.y < 0) {
-		degrees = 360 - (degrees * -1);
-	}
-	return degrees;
-};
+// 	if (this.vec.x > 0 && this.vec.y > 0) {
+// 		degrees = degrees;
+// 	}
+// 		if (this.vec.x < 0 && this.vec.y > 0) {
+// 		degrees = 180 - degrees;
+// 	}
+// 		if (this.vec.x < 0 && this.vec.y < 0) {
+// 		degrees = 180 + (degrees * -1);
+// 	}
+// 		if (this.vec.x > 0 && this.vec.y < 0) {
+// 		degrees = 360 - (degrees * -1);
+// 	}
+// 	return degrees;
+// };

@@ -1,6 +1,6 @@
-define('methods', function() {
+module.exports = Common;
 
-return function Common() {};
+function Common() {};
 
 Common.prototype.getDegrees = function () {
 	var degrees = 0;
@@ -24,7 +24,7 @@ Common.prototype.getDegrees = function () {
 };
 
 Common.prototype.remove = function (arr) {
-	var del = find(arr, this);
+	var del = this.find(arr, this);
 	if (del != -1) {
 		arr.splice(del, 1);
 	}
@@ -34,7 +34,7 @@ Common.prototype.remove = function (arr) {
 };
 
 Common.prototype.reload = function (arr, constr) {
-	var del = find(arr, this);
+	var del = this.find(arr, this);
 	if (del != -1) {
 		arr.splice(del, 1, arr[del] = new constr());
 	}
@@ -47,4 +47,22 @@ Common.prototype.grow = function () {
 	this.radius += 0.01;
 };
 
-});
+Common.prototype.randomInt = function (min, max) {
+	return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+Common.prototype.find = function (array, value) {
+	for(var i=0; i<array.length; i++) {
+		if (value !== undefined && array[i] !== undefined) {
+			if (array[i].u == value.u) return i;
+			}
+		}
+	return -1;
+};
+
+Common.prototype.randomColor = function (rmin, rmax, gmin, gmax, bmin, bmax, alpha) {
+	var r = this.randomInt(rmin, rmax);
+	var g = this.randomInt(gmin, gmax);
+	var b = this.randomInt(bmin, bmax);
+	return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+};

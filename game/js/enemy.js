@@ -1,4 +1,6 @@
 module.exports = Enemy;
+Common = require("./parentClass.js");
+
 var u = 0;
 var speedLimit = 1;
 var imgLoaded = false;
@@ -94,6 +96,8 @@ function Enemy (options) {
 	};
 };
 
+Enemy.prototype = Object.create(Common.prototype);
+
 Enemy.prototype.moveRandom = function () {
 	if (!(this.step % this.changeDirection)) {
 		this.direction = {
@@ -112,10 +116,6 @@ Enemy.prototype.moveRandom = function () {
 };
 
 
-Enemy.prototype.grow = function () {
-	this.radius += 0.01;
-};
-
 Enemy.prototype.boundaries = function () {
 	if (this.x <= -this.radius * 2 || this.x >= canvas2.width) {
 		this.direction.x *= -1;
@@ -125,46 +125,50 @@ Enemy.prototype.boundaries = function () {
 	}
 };
 
-Enemy.prototype.reload = function (player) {
-	var del = find(enemies, this);
-	if (del != -1) {
-		enemies.splice(del, 1, enemies[del] = new Enemy());
-	}
-	else {
-		console.log('error!');
-	}
-};
+// Enemy.prototype.grow = function () {
+// 	this.radius += 0.01;
+// };
 
-Enemy.prototype.remove = function () {
-	var del = find(enemies, this);
-	if (del != -1) {
-		enemies[del] = undefined;
-	}
-	else {
-		console.log('error!');
-	}
-};
+// Enemy.prototype.reload = function (player) {
+// 	var del = find(enemies, this);
+// 	if (del != -1) {
+// 		enemies.splice(del, 1, enemies[del] = new Enemy());
+// 	}
+// 	else {
+// 		console.log('error!');
+// 	}
+// };
 
-Enemy.prototype.getDegrees = function () {
-	var degrees = 0;
-	this.vec.x = this.x - this.pre.x;
-	this.vec.y = this.y - this.pre.y;
-	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+// Enemy.prototype.remove = function () {
+// 	var del = find(enemies, this);
+// 	if (del != -1) {
+// 		enemies[del] = undefined;
+// 	}
+// 	else {
+// 		console.log('error!');
+// 	}
+// };
 
-	if (this.vec.x > 0 && this.vec.y > 0) {
-		degrees = degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y > 0) {
-		degrees = 180 - degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y < 0) {
-		degrees = 180 + (degrees * -1);
-	}
-		if (this.vec.x > 0 && this.vec.y < 0) {
-		degrees = 360 - (degrees * -1);
-	}
-	return degrees;
-};
+// Enemy.prototype.getDegrees = function () {
+// 	var degrees = 0;
+// 	this.vec.x = this.x - this.pre.x;
+// 	this.vec.y = this.y - this.pre.y;
+// 	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
+
+// 	if (this.vec.x > 0 && this.vec.y > 0) {
+// 		degrees = degrees;
+// 	}
+// 		if (this.vec.x < 0 && this.vec.y > 0) {
+// 		degrees = 180 - degrees;
+// 	}
+// 		if (this.vec.x < 0 && this.vec.y < 0) {
+// 		degrees = 180 + (degrees * -1);
+// 	}
+// 		if (this.vec.x > 0 && this.vec.y < 0) {
+// 		degrees = 360 - (degrees * -1);
+// 	}
+// 	return degrees;
+// };
 
 function randomInt (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);

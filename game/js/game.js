@@ -268,9 +268,9 @@ $(document).ready(function() {
 							if (!isSoundOff) {
 								getExplosionSound();
 							}
-							bullet.remove();
+							bullet.remove(bullets);
 							generateExplode(enemy, bullet);
-							enemy.reload();
+							enemy.reload(enemies, Enemy);
 						}
 					});
 				}
@@ -352,6 +352,7 @@ $(document).ready(function() {
 				if (!isMusicOff) {
 					backgroundSound.play();
 				}
+				timer.unpause();
 				stopped = false;
 				loop();
 			}

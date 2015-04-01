@@ -1,4 +1,5 @@
 module.exports = Player;
+Common = require("./parentClass.js");
 
 var imgLoaded = false;
 var img = new Image();
@@ -74,6 +75,8 @@ function Player (options) {
 	};
 };
 
+Player.prototype = Object.create(Common.prototype);
+
 Player.prototype.move = function () {
 	this.pre.x = this.x;
 	this.pre.y = this.y;
@@ -126,25 +129,4 @@ Player.prototype.input = function () {
 		this.velocity.y = 2;
 		this.direction = "down";
 	}
-};
-
-Player.prototype.getDegrees = function () {
-	var degrees = 0;
-	this.vec.x = this.x - this.pre.x;
-	this.vec.y = this.y - this.pre.y;
-	degrees = (Math.asin(this.vec.y / Math.sqrt(this.vec.x * this.vec.x + this.vec.y * this.vec.y)) * 180 / Math.PI);
-
-	if (this.vec.x > 0 && this.vec.y > 0) {
-		degrees = degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y > 0) {
-		degrees = 180 - degrees;
-	}
-		if (this.vec.x < 0 && this.vec.y < 0) {
-		degrees = 180 + (degrees * -1);
-	}
-		if (this.vec.x > 0 && this.vec.y < 0) {
-		degrees = 360 - (degrees * -1);
-	}
-	return degrees;
 };
